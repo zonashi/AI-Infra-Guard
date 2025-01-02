@@ -1,0 +1,19 @@
+info:
+  name: gradio
+  author:
+  severity: info
+  metadata:
+    product: gradio
+    vendor: gradio
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<script>window.gradio_config = {" || body="document.getElementsByTagName(\"gradio-app\");"
+version:
+  - method: GET
+    path: '/'
+    extractor:
+      part: body
+      group: 1
+      regex: window.gradio_config = {"version":"(\d+\.\d+\.?\d+?)"

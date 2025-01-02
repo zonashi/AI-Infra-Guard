@@ -1,0 +1,12 @@
+info:
+  name: jupyter-server
+  author:
+  severity: info
+  metadata:
+    product: jupyter-server
+    vendor: jupyter
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Jupyter Server</title>"

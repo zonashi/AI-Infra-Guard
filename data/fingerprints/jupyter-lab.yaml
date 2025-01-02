@@ -1,0 +1,12 @@
+info:
+  name: jupyterlab
+  author:
+  severity: info
+  metadata:
+    product: jupyterlab
+    vendor: jupyter
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>JupyterLab</title>"

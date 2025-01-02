@@ -1,0 +1,12 @@
+info:
+  name: kubeflow
+  author:
+  severity: info
+  metadata:
+    product: kubeflow
+    vendor: kubeflow
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Kubeflow Central Dashboard</title>"

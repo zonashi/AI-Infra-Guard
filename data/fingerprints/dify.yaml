@@ -1,0 +1,12 @@
+info:
+  name: dify
+  author:
+  severity: info
+  metadata:
+    product: dify
+    vendor: dify
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Dify</title>" || icon="97378986"

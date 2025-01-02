@@ -1,0 +1,12 @@
+info:
+  name: comfyui
+  cve: ComfyUI follow_symlinks 文件读取漏洞
+  summary: ""
+  details: |+
+    ComfyUI  是 一个基于节点流程的 Stable Diffusion 操作界面,可以通过流程,实现了更加精准的工作流定制和完善的可复现性。2024年互联网上披露其存在文件读取漏洞，攻击者可在无需登陆的情况下读取遍历系统上的文件，造成敏感信息泄漏。
+    poc:http://ip:8188/../../../../../../../../../../../../../../etc/passwd
+  cvss:
+  severity: HIGH
+rule:  version > "0" && version  < "0.3"
+references:
+- https://github.com/comfyanonymous/ComfyUI/pull/2902

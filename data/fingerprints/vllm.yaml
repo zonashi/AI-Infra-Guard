@@ -1,0 +1,19 @@
+info:
+  name: vllm
+  author:
+  severity: info
+  metadata:
+    product: vllm
+    vendor: vllm-project
+http:
+  - method: GET
+    path: '/v1/models'
+    matchers:
+      - body="{\"object\":\"list\",\"data\""
+version:
+  - method: GET
+    path: '/version'
+    extractor:
+      part: body
+      group: 1
+      regex: '{"version":"(\d+\.\d+\.?\d+?)'

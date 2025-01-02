@@ -1,0 +1,19 @@
+info:
+  name: comfyui
+  author:
+  severity: info
+  metadata:
+    product: comfyanonymous
+    vendor: comfyui
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>ComfyUI</title>"
+version:
+  - method: GET
+    path: '/system_stats'
+    extractor:
+      part: body
+      group: 1
+      regex: '"comfyui_version":\s?"(.*?)"'

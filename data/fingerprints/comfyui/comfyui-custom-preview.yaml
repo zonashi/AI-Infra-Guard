@@ -1,0 +1,12 @@
+info:
+  name: ComfyUI-Prompt-Preview
+  author:
+  severity: info
+  metadata:
+    product: ComfyUI-Prompt-Preview
+    vendor: comfyui
+http:
+  - method: GET
+    path: '/extensions'
+    matchers:
+      - body="extensions/ComfyUI-Prompt-Preview/js"

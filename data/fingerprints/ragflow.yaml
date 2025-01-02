@@ -1,0 +1,12 @@
+info:
+  name: ragflow
+  author:
+  severity: info
+  metadata:
+    product: ragflow
+    vendor: ragflow
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>RAGFlow</title>"

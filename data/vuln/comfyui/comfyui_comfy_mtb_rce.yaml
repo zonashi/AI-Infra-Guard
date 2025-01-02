@@ -1,0 +1,11 @@
+info:
+  name: comfy_mtb
+  cve: comfy_mtb rce漏洞
+  summary: ""
+  details: |+
+    comfy_mtb存在远程命令执行漏洞，目前该漏洞为内部0day状态
+  cvss:
+  severity: HIGH
+rule: ""
+references:
+  - ""

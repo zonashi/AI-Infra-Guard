@@ -1,0 +1,12 @@
+info:
+  name: anythingllm
+  author:
+  severity: info
+  metadata:
+    product: anythingllm
+    vendor: anythingllm
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>AnythingLLM | Your personal LLM trained on anything</title>"

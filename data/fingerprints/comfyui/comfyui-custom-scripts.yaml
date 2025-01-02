@@ -1,0 +1,12 @@
+info:
+  name: ComfyUI-Custom-Scripts
+  author:
+  severity: info
+  metadata:
+    product: ComfyUI-Custom-Scripts
+    vendor: comfyui
+http:
+  - method: GET
+    path: '/extensions'
+    matchers:
+      - body="extensions/ComfyUI-Custom-Scripts/js"

@@ -1,0 +1,12 @@
+info:
+  name: llamafactory
+  author:
+  severity: info
+  metadata:
+    product: llamafactory
+    vendor: llama-factory
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="title\":=\"LLaMA Board"
