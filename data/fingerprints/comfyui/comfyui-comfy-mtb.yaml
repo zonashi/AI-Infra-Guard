@@ -1,0 +1,12 @@
+info:
+  name: comfy_mtb
+  author:
+  severity: info
+  metadata:
+    product: comfy_mtb
+    vendor: comfyui
+http:
+  - method: GET
+    path: '/extensions'
+    matchers:
+      - body="extensions/comfy_mtb/"

@@ -1,0 +1,16 @@
+info:
+  name: ray
+  author:
+  severity: info
+  metadata:
+    product: dashboard
+    vendor: ray
+http:
+  - method: GET
+    path: '/api/cluster_status'
+    matchers:
+      - body="Got cluster status"
+  - method: GET
+    path: '/'
+    matchers:
+      - icon="463802404"

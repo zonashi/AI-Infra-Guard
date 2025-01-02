@@ -1,0 +1,12 @@
+info:
+  name: xinference
+  author:
+  severity: info
+  metadata:
+    product: xinference
+    vendor: xorbitsai
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Xinference</title>" || icon="1830133050"

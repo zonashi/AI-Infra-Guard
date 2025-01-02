@@ -1,0 +1,12 @@
+info:
+  name: jupyter-notebook
+  author:
+  severity: info
+  metadata:
+    product: jupyter-notebook
+    vendor: jupyter
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Jupyter Notebook</title>"

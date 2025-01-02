@@ -1,0 +1,12 @@
+info:
+  name: langchain
+  author:
+  severity: info
+  metadata:
+    product: ChatLangChain
+    vendor: LangChain
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Chat LangChain</title>"

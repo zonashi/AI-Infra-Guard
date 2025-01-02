@@ -1,0 +1,19 @@
+info:
+  name: ollama
+  author:
+  severity: info
+  metadata:
+    product: ollama
+    vendor: ollama
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="Ollama is running"
+version:
+  - method: GET
+    path: '/api/version'
+    extractor:
+      part: body
+      group: 1
+      regex: '{"version":"(\d+\.\d+\.?\d+?)"}'

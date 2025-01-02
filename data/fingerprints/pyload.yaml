@@ -1,0 +1,12 @@
+info:
+  name: pyload-ng
+  author:
+  severity: info
+  metadata:
+    product: pyload
+    vendor: pyload
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>Login - pyLoad </title>"

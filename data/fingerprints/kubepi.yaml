@@ -1,0 +1,12 @@
+info:
+  name: kubepi
+  author:
+  severity: info
+  metadata:
+    product: KubePi
+    vendor: 1Panel
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="<title>KubePi</title>"

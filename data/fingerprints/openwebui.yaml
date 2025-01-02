@@ -1,0 +1,12 @@
+info:
+  name: open-webui
+  author:
+  severity: info
+  metadata:
+    product: open-webui
+    vendor: open-webui
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - body="title=\"Open WebUI\""
