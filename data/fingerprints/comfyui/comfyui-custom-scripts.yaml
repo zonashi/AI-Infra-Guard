@@ -5,6 +5,7 @@ info:
   metadata:
     product: ComfyUI-Custom-Scripts
     vendor: comfyui
+    type: plugin
 http:
   - method: GET
     path: '/extensions'

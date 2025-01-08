@@ -5,6 +5,7 @@ info:
   metadata:
     product: comfy_mtb
     vendor: comfyui
+    type: plugin
 http:
   - method: GET
     path: '/extensions'

@@ -32,6 +32,7 @@ func CollectedFpReqs() []FingerPrintFunc {
 type FpResult struct {
 	Name    string `json:"name"`
 	Version string `json:"version,omitempty"`
+	Type    string `json:"type,omitempty"`
 }
 
 // Runner 指纹识别运行器
@@ -91,9 +92,14 @@ func (r *Runner) RunFpReqs(uri string, concurrent int, faviconHash int32) []FpRe
 							gologger.WithError(err).Errorln("获取版本失败")
 						}
 						mux.Lock()
+						type_, ok := fp.Info.Metadata["type"]
+						if !ok {
+							type_ = ""
+						}
 						ret = append(ret, FpResult{
 							Name:    name,
 							Version: version,
+							Type:    type_,
 						})
 						mux.Unlock()
 						break
@@ -110,6 +116,7 @@ func (r *Runner) RunFpReqs(uri string, concurrent int, faviconHash int32) []FpRe
 				fpresult := FpResult{
 					Name:    fpReq.Name(),
 					Version: "",
+					Type:    "",
 				}
 				version, err := fpReq.GetVersion(r.hp, uri)
 				if err == nil {
