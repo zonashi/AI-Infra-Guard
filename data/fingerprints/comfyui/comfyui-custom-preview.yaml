@@ -5,6 +5,7 @@ info:
   metadata:
     product: ComfyUI-Prompt-Preview
     vendor: comfyui
+    type: plugin
 http:
   - method: GET
     path: '/extensions'

@@ -257,6 +257,10 @@ func (r *Runner) extractContent(fullUrl string, resp *httpx.Response, respTime s
 		for _, item := range fpResults {
 			builder.WriteString("[")
 			builder.WriteString(item.Name)
+			if item.Type != "" {
+				builder.WriteString(":")
+				builder.WriteString(item.Type)
+			}
 			if item.Version != "" {
 				builder.WriteString(":")
 				builder.WriteString(item.Version)
