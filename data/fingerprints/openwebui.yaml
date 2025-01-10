@@ -10,3 +10,10 @@ http:
     path: '/'
     matchers:
       - body="title=\"Open WebUI\""
+version:
+  - method: GET
+    path: '/api/version'
+    extractor:
+      part: body
+      group: 1
+      regex: '{"version":"(\d+\.\d+\.?\d+?)"'
