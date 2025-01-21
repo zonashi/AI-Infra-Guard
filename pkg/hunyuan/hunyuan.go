@@ -23,11 +23,11 @@ func HunyuanAI(prompt string, key string) (string, error) {
 	}
 	baseUrl := os.Getenv("OPENAI_BASE_URL") // 默认值
 	if baseUrl == "" {
-		baseUrl = "https://hunyuan.tencentcloudapi.com"
+		baseUrl = "https://api.hunyuan.cloud.tencent.com/v1/"
 	}
 	model := os.Getenv("OPENAI_MODEL")
 	if model == "" {
-		model = "hunyuan-turbo"
+		model = "hunyuan-lite"
 	}
 	client := openai.NewClient(option.WithBaseURL(baseUrl), option.WithAPIKey(key))
 	ctx := context.Background()
