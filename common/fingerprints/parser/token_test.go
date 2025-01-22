@@ -19,3 +19,12 @@ func TestParseTokens2(t *testing.T) {
 	}
 	t.Log(tokens)
 }
+
+func TestParseAdvisorTokens2(t *testing.T) {
+	s := "version >= \"1.0.0\" || version < \"2.0.0\" || version == \"3.0.0\""
+	tokens, err := ParseAdvisorTokens(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(tokens)
+}

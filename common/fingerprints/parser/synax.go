@@ -70,6 +70,8 @@ func TransFormExp(tokens []Token) (*Rule, error) {
 				p2.name == tokenFullEqual ||
 				p2.name == tokenNotEqual ||
 				p2.name == tokenRegexEqual ||
+				p2.name == tokenGte ||
+				p2.name == tokenLte ||
 				p2.name == tokenGt ||
 				p2.name == tokenLt) {
 				return nil, errors.New("synax error in " + tmpToken.content + " " + p2.content)
@@ -268,6 +270,11 @@ func (r *Rule) AdvisoryEval(config *AdvisoryConfig) bool {
 				r = v1.GreaterThan(vv.Must(vv.NewVersion(text)))
 			case tokenLt:
 				r = v1.LessThan(vv.Must(vv.NewVersion(text)))
+			case tokenGte:
+				r = v1.GreaterThanOrEqual(vv.Must(vv.NewVersion(text)))
+			case tokenLte:
+				r = v1.LessThanOrEqual(vv.Must(vv.NewVersion(text)))
+
 			default:
 				panic("unknown p2 token")
 			}

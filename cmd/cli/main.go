@@ -15,6 +15,9 @@ func main() {
 	}
 	defer r.Close() // 关闭runner
 	gologger.Logger.SetLevel(gologger.InfoLevel)
+	if parseOptions.CheckVulTargets {
+		return
+	}
 	if parseOptions.ListFpsTemplate || parseOptions.ListVulTemplate {
 		// 打印指纹和漏洞列表
 		r.ShowFpAndVulList(parseOptions.ListFpsTemplate, parseOptions.ListVulTemplate)
