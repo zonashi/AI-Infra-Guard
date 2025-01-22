@@ -40,7 +40,9 @@ const (
 const (
 	tokenVersion = "version" // version identifier
 	tokenGt      = ">"       // greater than
-	tokenLt      = "<"       // less than
+	tokenGte     = ">="
+	tokenLt      = "<" // less than
+	tokenLte     = "<="
 )
 
 // ParseTokens converts input string to token sequence, supporting text content(quoted),
@@ -54,7 +56,7 @@ func ParseAdvisorTokens(s1 string) ([]Token, error) {
 	return parseTokensWithOptions(s1, []string{tokenVersion})
 }
 
-// parseTokensWithOptions 是提取的公共解析函数
+// parseTokensWithOptions 提取Token的公共解析函数
 func parseTokensWithOptions(s1 string, validKeywords []string) ([]Token, error) {
 	s, tokens := []rune(s1), []Token{}
 	for i := 0; i < len(s); {
@@ -66,7 +68,7 @@ func parseTokensWithOptions(s1 string, validKeywords []string) ([]Token, error) 
 			}
 			tokens = append(tokens, token)
 			i = newPos + 1
-		case '=', '~', '!', '|', '&':
+		case '=', '~', '!', '|', '&', '>', '<':
 			token, skip := parseOperator(s[i:])
 			if token.name != "" {
 				tokens = append(tokens, token)
@@ -75,12 +77,6 @@ func parseTokensWithOptions(s1 string, validKeywords []string) ([]Token, error) 
 		case '(', ')':
 			tokens = append(tokens, Token{
 				name:    map[rune]string{'(': tokenLeftBracket, ')': tokenRightBracket}[x],
-				content: string(x),
-			})
-			i++
-		case '>', '<':
-			tokens = append(tokens, Token{
-				name:    map[rune]string{'>': tokenGt, '<': tokenLt}[x],
 				content: string(x),
 			})
 			i++
@@ -118,20 +114,24 @@ func parseQuotedText(s []rune, start int) (Token, int, error) {
 
 // 辅助函数：解析操作符
 func parseOperator(s []rune) (Token, int) {
-	ops := map[string]struct {
+	ops := []struct {
 		name, content string
 		skip          int
 	}{
-		"==": {tokenFullEqual, "==", 2},
-		"=":  {tokenContains, "=", 1},
-		"~=": {tokenRegexEqual, "~=", 2},
-		"!=": {tokenNotEqual, "!=", 2},
-		"||": {tokenOr, "||", 2},
-		"&&": {tokenAnd, "&&", 2},
+		{tokenFullEqual, "==", 2},
+		{tokenContains, "=", 1},
+		{tokenRegexEqual, "~=", 2},
+		{tokenNotEqual, "!=", 2},
+		{tokenOr, "||", 2},
+		{tokenAnd, "&&", 2},
+		{tokenGte, ">=", 2},
+		{tokenLte, "<=", 2},
+		{tokenGt, ">", 1},
+		{tokenLt, "<", 1},
 	}
-	for op, info := range ops {
-		if strings.HasPrefix(string(s), op) {
-			return Token{name: info.name, content: info.content}, info.skip
+	for _, op := range ops {
+		if strings.HasPrefix(string(s), op.content) {
+			return Token{name: op.name, content: op.content}, op.skip
 		}
 	}
 	return Token{}, 0

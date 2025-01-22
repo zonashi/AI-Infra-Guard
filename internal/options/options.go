@@ -21,6 +21,7 @@ type Options struct {
 	AdvTemplates    string          // 漏洞模板路径
 	ListFpsTemplate bool            // 是否列出指纹模板
 	ListVulTemplate bool            // 是否列出漏洞模板
+	CheckVulTargets bool            // 检查漏洞模板是否正确
 	AIAnalysis      bool            // 是否启用AI分析
 	AIToken         string          // AI服务的认证令牌
 }
@@ -52,6 +53,7 @@ func ParseOptions() *Options {
 	flag.StringVar(&options.AdvTemplates, "vul", "data/vuln", "指定漏洞库目录")
 	flag.BoolVar(&options.ListFpsTemplate, "list-fps", false, "输出指纹列表")
 	flag.BoolVar(&options.ListVulTemplate, "list-vul", false, "输出漏洞库列表")
+	flag.BoolVar(&options.CheckVulTargets, "check-vul", false, "检查漏洞模板是否正确")
 	flag.BoolVar(&options.AIAnalysis, "ai", false, "AI分析")
 	flag.StringVar(&options.AIToken, "token", "", "混元token")
 	flag.Parse()
