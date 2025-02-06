@@ -182,7 +182,8 @@ func (r *Rule) Eval(config *Config) bool {
 			default:
 				panic("unknown s1 token")
 			}
-			text := next.p3
+			s1 = strings.ToLower(s1)
+			text := strings.ToLower(next.p3)
 			var r bool
 			switch next.p2 {
 			case tokenFullEqual:

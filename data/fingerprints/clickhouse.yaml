@@ -1,0 +1,12 @@
+info:
+  name: clickhouse
+  author:
+  severity: info
+  metadata:
+    product: clickhouse
+    vendor: clickhouse
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - header="x-clickhouse-summary"
