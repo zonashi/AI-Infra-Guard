@@ -24,6 +24,7 @@ AI Infra Guard is an **efficient**, **lightweight**, and **user-friendly** AI in
 |         anythingllm |        8 |
 |           langchain |       33 |
 |          Chuanhugpt |        0 |
+|          clickhouse |       22 |
 |           comfy_mtb |        1 |
 | ComfyUI-Prompt-Preview |        1 |
 | ComfyUI-Custom-Scripts |        1 |
@@ -46,8 +47,10 @@ AI Infra Guard is an **efficient**, **lightweight**, and **user-friendly** AI in
 |             ragflow |        2 |
 |                 ray |        3 |
 |         tensorboard |        0 |
-|                vllm |        2 |
+|                vllm |        3 |
 |          xinference |        0 |
+
+
 
 
 
