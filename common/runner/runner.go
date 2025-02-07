@@ -419,6 +419,10 @@ func (r *Runner) writeResult(f *os.File, result HttpResult) {
 			builderFile.WriteString(fmt.Sprintf("%s [%s]\n", name, serverity))
 			builder.WriteString(": " + item.Info.Summary + "\n" + item.Info.Details + "\n")
 			builderFile.WriteString(": " + item.Info.Summary + "\n" + item.Info.Details + "\n")
+			if len(item.Info.SecurityAdvise) > 0 {
+				builder.WriteString("修复建议: " + item.Info.SecurityAdvise + "\n")
+				builderFile.WriteString("修复建议: " + item.Info.SecurityAdvise + "\n")
+			}
 			fmt.Println(builder.String())
 			_, _ = f.WriteString(builderFile.String() + "\n")
 		}

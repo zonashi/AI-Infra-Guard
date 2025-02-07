@@ -4,6 +4,7 @@ package vulstruct
 import (
 	"github.com/Tencent/AI-Infra-Guard/common/fingerprints/parser"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -11,12 +12,13 @@ import (
 // Info represents vulnerability information structure
 // 存储漏洞信息的结构体
 type Info struct {
-	FingerPrintName string `yaml:"name"`     // Name of the fingerprint
-	CVEName         string `yaml:"cve"`      // CVE identifier
-	Summary         string `yaml:"summary"`  // Brief summary of the vulnerability
-	Details         string `yaml:"details"`  // Detailed description
-	CVSS            string `yaml:"cvss"`     // CVSS score
-	Severity        string `yaml:"severity"` // Severity level
+	FingerPrintName string `yaml:"name"`                      // Name of the fingerprint
+	CVEName         string `yaml:"cve"`                       // CVE identifier
+	Summary         string `yaml:"summary"`                   // Brief summary of the vulnerability
+	Details         string `yaml:"details"`                   // Detailed description
+	CVSS            string `yaml:"cvss"`                      // CVSS score
+	Severity        string `yaml:"severity"`                  // Severity level
+	SecurityAdvise  string `yaml:"security_advise,omitempty"` // Security advisory
 }
 
 // VersionVul represents a version-based vulnerability
@@ -45,6 +47,7 @@ func ReadVersionVulSingFile(filename string) (*VersionVul, error) {
 	if err != nil {
 		return nil, err
 	}
+	advisory.Info.Details = strings.TrimSpace(advisory.Info.Details)
 
 	// Parse rule string into tokens
 	// 将规则字符串解析为词法单元
