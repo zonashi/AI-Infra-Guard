@@ -57,7 +57,7 @@ AI Infra Guard is an **efficient**, **lightweight**, and **user-friendly** AI in
 ## 🚀 Quick Preview
 **Quick Usage**
 
-![AI Security Scanner Demo](img/img.png)
+![AI Security Scanner Demo](img/img.jpg)
 
 **AI Analysis**
 
