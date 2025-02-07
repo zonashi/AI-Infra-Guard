@@ -22,6 +22,7 @@ AI Infra Guard(AI Infrastructure Guard) 是一个**高效**、**轻量**、**易
 |         anythingllm |        8 |
 |           langchain |       33 |
 |          Chuanhugpt |        0 |
+|          clickhouse |       22 |
 |           comfy_mtb |        1 |
 | ComfyUI-Prompt-Preview |        1 |
 | ComfyUI-Custom-Scripts |        1 |
@@ -44,7 +45,7 @@ AI Infra Guard(AI Infrastructure Guard) 是一个**高效**、**轻量**、**易
 |             ragflow |        2 |
 |                 ray |        3 |
 |         tensorboard |        0 |
-|                vllm |        2 |
+|                vllm |        3 |
 |          xinference |        0 |
 
 
