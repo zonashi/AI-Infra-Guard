@@ -73,7 +73,7 @@ func (r *Runner) RunFpReqs(uri string, concurrent int, faviconHash int32) []FpRe
 				} else {
 					resp, err = r.hp.Get(uri+req.Path, nil)
 					if err != nil {
-						gologger.WithError(err).Errorln("请求失败")
+						gologger.WithError(err).Debugln("请求失败")
 						continue
 					}
 				}

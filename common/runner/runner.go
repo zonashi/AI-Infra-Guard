@@ -4,6 +4,12 @@ package runner
 import (
 	"bufio"
 	"fmt"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/Tencent/AI-Infra-Guard/common/fingerprints/parser"
 	"github.com/Tencent/AI-Infra-Guard/common/fingerprints/preload"
 	"github.com/Tencent/AI-Infra-Guard/common/utils"
@@ -12,11 +18,6 @@ import (
 	"github.com/Tencent/AI-Infra-Guard/pkg/httpx"
 	"github.com/Tencent/AI-Infra-Guard/pkg/hunyuan"
 	"github.com/Tencent/AI-Infra-Guard/pkg/vulstruct"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/projectdiscovery/fastdialer/fastdialer"
@@ -150,7 +151,6 @@ func (r *Runner) processTargetList(targets []string) {
 			r.total++
 		}
 	}
-
 }
 
 // processTargets 处理所有输入的目标
@@ -180,6 +180,21 @@ func (r *Runner) processTargets() error {
 			r.processTargetList(targets)
 		}
 	}
+
+	if r.Options.LocalScan {
+		op, err := utils.GetLocalOpenPorts()
+		if err != nil {
+			gologger.Fatalf("get local open port failed,err:%s", err)
+		}
+		var targets []string
+		for _, p := range op {
+			targets = append(targets, p.Address+":"+strconv.Itoa(p.Port))
+		}
+		r.processTargetList(targets)
+	}
+	if r.total > 0 {
+		gologger.Infof("加载目标数量:%d", r.total)
+	}
 	return nil
 }
 
@@ -199,7 +214,7 @@ func (r *Runner) initComponents() error {
 	// 配置HTTP客户端选项
 	httpOptions := &httpx.HTTPOptions{
 		Timeout:          time.Duration(r.Options.TimeOut) * time.Second,
-		RetryMax:         3,
+		RetryMax:         1,
 		FollowRedirects:  false,
 		HTTPProxy:        r.Options.ProxyURL,
 		Unsafe:           false,

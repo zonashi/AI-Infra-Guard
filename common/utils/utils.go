@@ -2,12 +2,15 @@
 package utils
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/base64"
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -176,4 +179,95 @@ func GetMiddleText(left, right, html string) string {
 	end += start
 
 	return html[start:end]
+}
+
+// PortInfo 存储端口和地址信息
+type PortInfo struct {
+	Port    int
+	Address string
+}
+
+// GetLocalOpenPorts 获取本地开放的端口及其地址信息
+func GetLocalOpenPorts() ([]PortInfo, error) {
+	var portInfos []PortInfo
+	switch runtime.GOOS {
+	case "windows":
+		cmd := exec.Command("netstat", "-an")
+		output, err := cmd.Output()
+		if err != nil {
+			return nil, fmt.Errorf("执行netstat命令失败: %v", err)
+		}
+
+		scanner := bufio.NewScanner(strings.NewReader(string(output)))
+		for scanner.Scan() {
+			line := scanner.Text()
+			if strings.Contains(line, "LISTENING") {
+				parts := strings.Fields(line)
+				if len(parts) >= 2 {
+					addrPort := strings.Split(parts[1], ":")
+					if len(addrPort) == 2 {
+						port, err := strconv.Atoi(addrPort[1])
+						if err == nil {
+							addr := addrPort[0]
+							portInfos = append(portInfos, PortInfo{
+								Port:    port,
+								Address: addr,
+							})
+						}
+					}
+				}
+			}
+		}
+
+	case "darwin", "linux":
+		cmd := exec.Command("lsof", "-i", "-P", "-n")
+		output, err := cmd.Output()
+		if err != nil {
+			return nil, fmt.Errorf("执行lsof命令失败: %v", err)
+		}
+
+		scanner := bufio.NewScanner(strings.NewReader(string(output)))
+		for scanner.Scan() {
+			line := scanner.Text()
+			if strings.Contains(line, "LISTEN") {
+				parts := strings.Fields(line)
+				for _, part := range parts {
+					if strings.Contains(part, ":") {
+						addrPort := strings.Split(part, ":")
+						if len(addrPort) == 2 {
+							port, err := strconv.Atoi(addrPort[1])
+							if err == nil {
+								addr := addrPort[0]
+								if addr == "*" || addr == "0.0.0.0" {
+									addr = "0.0.0.0"
+								} else if addr == "127.0.0.1" || addr == "localhost" {
+									addr = "127.0.0.1"
+								}
+								portInfos = append(portInfos, PortInfo{
+									Port:    port,
+									Address: addr,
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+
+	default:
+		return nil, fmt.Errorf("不支持的操作系统: %s", runtime.GOOS)
+	}
+
+	// 去重
+	seen := make(map[string]bool)
+	var result []PortInfo
+	for _, info := range portInfos {
+		key := fmt.Sprintf("%s:%d", info.Address, info.Port)
+		if !seen[key] {
+			seen[key] = true
+			result = append(result, info)
+		}
+	}
+
+	return result, nil
 }
