@@ -1,0 +1,12 @@
+info:
+  name: llmstudio
+  author:
+  severity: info
+  metadata:
+    product: lmstudio
+    vendor: lmstudio
+http:
+  - method: GET
+    path: '/'
+    matchers:
+      - "body=\"Unexpected endpoint or method. (GET /)\" && header=\"x-powered-by: Express\""
