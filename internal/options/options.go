@@ -4,8 +4,9 @@ package options
 import (
 	"errors"
 	"flag"
-	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"net/url"
+
+	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 )
 
 // Options 定义了程序的所有配置选项
@@ -24,6 +25,7 @@ type Options struct {
 	CheckVulTargets bool            // 检查漏洞模板是否正确
 	AIAnalysis      bool            // 是否启用AI分析
 	AIToken         string          // AI服务的认证令牌
+	LocalScan       bool            // 一键检测本地
 }
 
 // multiStringFlag 用于支持命令行中多个相同参数的输入
@@ -46,7 +48,7 @@ func ParseOptions() *Options {
 	flag.Var(&options.Target, "target", "目标,可以指定多个目标 eg:-target xx.com -target aa.com")
 	flag.StringVar(&options.TargetFile, "file", "", "指定目标文件")
 	flag.StringVar(&options.Output, "o", "", "输出的文件")
-	flag.IntVar(&options.TimeOut, "timeout", 30, "超时时间(s)")
+	flag.IntVar(&options.TimeOut, "timeout", 5, "超时时间(s)")
 	flag.StringVar(&options.ProxyURL, "proxy-url", "", "代理url")
 	flag.IntVar(&options.RateLimit, "limit", 200, "限制每秒的并发数量")
 	flag.StringVar(&options.FPTemplates, "fps", "data/fingerprints", "指定指纹文件或目录")
@@ -56,6 +58,7 @@ func ParseOptions() *Options {
 	flag.BoolVar(&options.CheckVulTargets, "check-vul", false, "检查漏洞模板是否正确")
 	flag.BoolVar(&options.AIAnalysis, "ai", false, "AI分析")
 	flag.StringVar(&options.AIToken, "token", "", "混元token")
+	flag.BoolVar(&options.LocalScan, "localscan", false, "一键检测本地")
 	flag.Parse()
 	options.configureOutput()
 	ShowBanner()

@@ -50,3 +50,11 @@ func TestFaviconHash(t *testing.T) {
 	hash := FaviconHash(resp.Data)
 	t.Log(hash)
 }
+
+func TestGetLocalOpenPorts(t *testing.T) {
+	op, err := GetLocalOpenPorts()
+	assert.NoError(t, err)
+	for _, item := range op {
+		t.Log(item.Address, item.Port)
+	}
+}
