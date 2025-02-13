@@ -19,6 +19,7 @@ import (
 	"github.com/Tencent/AI-Infra-Guard/pkg/hunyuan"
 	"github.com/Tencent/AI-Infra-Guard/pkg/vulstruct"
 
+	"github.com/liushuochen/gotable"
 	"github.com/logrusorgru/aurora"
 	"github.com/projectdiscovery/fastdialer/fastdialer"
 	"github.com/projectdiscovery/hmap/store/hybrid"
@@ -398,8 +399,64 @@ func (r *Runner) handleOutput(wg *sizedwaitgroup.SizedWaitGroup) {
 	if f != nil {
 		defer f.Close()
 	}
+	var results []HttpResult
 	for result := range r.result {
+		results = append(results, result)
 		r.writeResult(f, result)
+	}
+	// summary table
+	if len(results) > 0 {
+		table, err := gotable.Create("Target", "StatusCode", "Title", "FingerPrint")
+		if err != nil {
+			gologger.Errorf("create table error: %v", err)
+			return
+		}
+		vulTable, err := gotable.Create("CVE", "Severity", "VulName", "Target", "Suggestions")
+		if err != nil {
+			gologger.Errorf("create table error:%v", err)
+			return
+		}
+		var showVulTable bool = false
+		for _, row := range results {
+			data := make(map[string]string)
+			var fpString string = ""
+			for _, fp := range row.Fingers {
+				fpString += fp.Name
+				if fp.Type != "" {
+					fpString += ":" + fp.Type
+				}
+				if fp.Version != "" {
+					fpString += ":" + fp.Version
+				}
+			}
+			data = map[string]string{
+				"Target":      row.URL,
+				"StatusCode":  fmt.Sprintf("%d", row.StatusCode),
+				"Title":       row.Title,
+				"FingerPrint": fpString,
+			}
+			table.AddRow(data)
+
+			// write into vulTable
+			for _, ad := range row.Advisories {
+				showVulTable = true
+				var adRow = []string{
+					ad.Info.CVEName,
+					ad.Info.Severity,
+					ad.Info.Summary,
+					row.URL,
+					ad.Info.SecurityAdvise,
+				}
+				vulTable.AddRow(adRow)
+			}
+		}
+		fmt.Println("Application Summary:")
+		fmt.Println(table.String())
+		if showVulTable {
+			fmt.Println("Vulnerability Summary:")
+			fmt.Println(vulTable.String())
+		}
+
 	}
 }
 
