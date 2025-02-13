@@ -269,6 +269,13 @@ func (r *Runner) extractContent(fullUrl string, resp *httpx.Response, respTime s
 	// 内部指纹
 	fpResults := r.fpEngine.RunFpReqs(fullUrl, 10, faviconHash)
 	ads := make([]vulstruct.VersionVul, 0)
+	isInternal := true
+	if strings.Contains(fullUrl, "127.0.0.1") {
+		isInternal = false
+	}
+	if strings.Contains(fullUrl, "localhost") {
+		isInternal = false
+	}
 	if len(fpResults) > 0 {
 		for _, item := range fpResults {
 			builder.WriteString("[")
@@ -283,7 +290,8 @@ func (r *Runner) extractContent(fullUrl string, resp *httpx.Response, respTime s
 			}
 			builder.WriteString("]")
 			builder.WriteString(" ")
-			advisories, err := r.advEngine.GetAdvisories(item.Name, item.Version)
+
+			advisories, err := r.advEngine.GetAdvisories(item.Name, item.Version, isInternal)
 			if err != nil {
 				gologger.Errorf("get advisory error: %s", err)
 			} else {
@@ -535,7 +543,7 @@ func (r *Runner) ShowFpAndVulList(fps, vul bool) {
 		mark := strings.Builder{}
 		mark.WriteString("| 组件名称            | 漏洞数量 |\n|---------------------|----------|\n")
 		for _, fp := range fingerprints {
-			ads, err := r.advEngine.GetAdvisories(fp, "")
+			ads, err := r.advEngine.GetAdvisories(fp, "", false)
 			if err != nil {
 				gologger.WithError(err).Errorln("获取漏洞列表失败", fp)
 				continue

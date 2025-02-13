@@ -9,7 +9,7 @@ func TestAdvisoryEngine(t *testing.T) {
 	dir := "data/advisories"
 	ad, err := NewAdvisoryEngine(dir)
 	assert.NoError(t, err)
-	results, err := ad.GetAdvisories("mlflow", "2.13")
+	results, err := ad.GetAdvisories("mlflow", "2.13", true)
 	assert.NoError(t, err)
 	for _, result := range results {
 		t.Log(result)

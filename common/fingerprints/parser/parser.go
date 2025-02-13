@@ -56,7 +56,8 @@ type Config struct {
 
 // AdvisoryConfig 提供漏洞配置信息
 type AdvisoryConfig struct {
-	Version string
+	Version    string
+	IsInternal bool
 }
 
 // transfromRule 将规则字符串转换为规则对象
