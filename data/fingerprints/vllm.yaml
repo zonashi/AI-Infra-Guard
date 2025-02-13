@@ -7,9 +7,9 @@ info:
     vendor: vllm-project
 http:
   - method: GET
-    path: '/v1/models'
+    path: '/version'
     matchers:
-      - body="{\"object\":\"list\",\"data\""
+      - body="{\"version\":\""
 version:
   - method: GET
     path: '/version'
