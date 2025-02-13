@@ -40,34 +40,33 @@ AI Infra Guard is an **efficient**, **lightweight**, and **user-friendly** AI in
 |            kubeflow |        4 |
 |              kubepi |        5 |
 |        llamafactory |        1 |
+|           llmstudio |        0 |
 |              ollama |        7 |
-|          open-webui |        7 |
+|          open-webui |        8 |
 |           pyload-ng |       18 |
 |           qanything |        2 |
 |             ragflow |        2 |
-|                 ray |        3 |
+|                 ray |        4 |
 |         tensorboard |        0 |
-|                vllm |        3 |
+|                vllm |        4 |
 |          xinference |        0 |
-
-
-
-
 
 ## 🚀 Quick Preview
 **Quick Usage**
 
 ![AI Security Scanner Demo](img/img.jpg)
-
-**AI Analysis**
-
-![AI Security Scanner AI Analysis Demo](img/output.gif)
+![](img/img2.png)
 
 ## 📦 Installation and Usage
 ### Installation
 Download from: [https://github.com/Tencent/AI-Infra-Guard/releases](https://github.com/Tencent/AI-Infra-Guard/releases)
 
 ### Usage
+**Local Scan**
+```
+./ai-infra-guard -localscan
+```
+
 **Single Target**
 ```
 ./ai-infra-guard -target [IP/Domain] 
