@@ -40,14 +40,14 @@ func NewAdvisoryEngine(dir string) (*AdvisoryEngine, error) {
 // PackageName: 需要检查的包名
 // version: 需要检查的版本号
 // 返回: 匹配的漏洞建议列表和可能的错误
-func (ae *AdvisoryEngine) GetAdvisories(packageName, version string) ([]VersionVul, error) {
+func (ae *AdvisoryEngine) GetAdvisories(packageName, version string, isInternal bool) ([]VersionVul, error) {
 	ret := make([]VersionVul, 0)
 	for _, ad := range ae.ads {
 		if ad.Info.FingerPrintName != packageName {
 			continue
 		}
 		if version != "" && ad.Rule != "" {
-			if ad.RuleCompile.AdvisoryEval(&parser.AdvisoryConfig{Version: version}) {
+			if ad.RuleCompile.AdvisoryEval(&parser.AdvisoryConfig{Version: version, IsInternal: isInternal}) {
 				ret = append(ret, ad)
 			}
 		} else {

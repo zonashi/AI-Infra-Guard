@@ -38,11 +38,12 @@ const (
 
 // Version comparison related tokens
 const (
-	tokenVersion = "version" // version identifier
-	tokenGt      = ">"       // greater than
-	tokenGte     = ">="
-	tokenLt      = "<" // less than
-	tokenLte     = "<="
+	tokenVersion    = "version" // version identifier
+	tokenIsInternal = "is_internal"
+	tokenGt         = ">" // greater than
+	tokenGte        = ">="
+	tokenLt         = "<" // less than
+	tokenLte        = "<="
 )
 
 // ParseTokens converts input string to token sequence, supporting text content(quoted),
@@ -53,7 +54,7 @@ func ParseTokens(s1 string) ([]Token, error) {
 
 // ParseAdvisorTokens parses advisor expressions, similar to ParseTokens but supports version keyword
 func ParseAdvisorTokens(s1 string) ([]Token, error) {
-	return parseTokensWithOptions(s1, []string{tokenVersion})
+	return parseTokensWithOptions(s1, []string{tokenVersion, tokenIsInternal})
 }
 
 // parseTokensWithOptions 提取Token的公共解析函数

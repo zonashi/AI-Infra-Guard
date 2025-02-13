@@ -61,7 +61,7 @@ func TransFormExp(tokens []Token) (*Rule, error) {
 			return nil, err
 		}
 		switch tmpToken.name {
-		case tokenBody, tokenHeader, tokenIcon, tokenVersion:
+		case tokenBody, tokenHeader, tokenIcon, tokenVersion, tokenIsInternal:
 			p2, err := stream.next()
 			if err != nil {
 				return nil, err
@@ -247,6 +247,7 @@ func (r *Rule) AdvisoryEval(config *AdvisoryConfig) bool {
 			var s1 string
 			var v1 *vv.Version
 			var text string
+			var r bool
 			switch next.p1 {
 			case tokenVersion:
 				s1 = versionCheck(config.Version)
@@ -256,28 +257,29 @@ func (r *Rule) AdvisoryEval(config *AdvisoryConfig) bool {
 					v1, _ = vv.NewVersion("0.0.0")
 				}
 				text = versionCheck(next.p3)
+				switch next.p2 {
+				case tokenFullEqual:
+					r = v1.Equal(vv.Must(vv.NewVersion(text)))
+				case tokenContains:
+					r = v1.Equal(vv.Must(vv.NewVersion(text)))
+				case tokenNotEqual:
+					r = !v1.Equal(vv.Must(vv.NewVersion(text)))
+				case tokenGt:
+					r = v1.GreaterThan(vv.Must(vv.NewVersion(text)))
+				case tokenLt:
+					r = v1.LessThan(vv.Must(vv.NewVersion(text)))
+				case tokenGte:
+					r = v1.GreaterThanOrEqual(vv.Must(vv.NewVersion(text)))
+				case tokenLte:
+					r = v1.LessThanOrEqual(vv.Must(vv.NewVersion(text)))
+
+				default:
+					panic("unknown p2 token")
+				}
+			case tokenIsInternal:
+				r = config.IsInternal
 			default:
 				panic("unknown s1 token")
-			}
-			var r bool
-			switch next.p2 {
-			case tokenFullEqual:
-				r = v1.Equal(vv.Must(vv.NewVersion(text)))
-			case tokenContains:
-				r = v1.Equal(vv.Must(vv.NewVersion(text)))
-			case tokenNotEqual:
-				r = !v1.Equal(vv.Must(vv.NewVersion(text)))
-			case tokenGt:
-				r = v1.GreaterThan(vv.Must(vv.NewVersion(text)))
-			case tokenLt:
-				r = v1.LessThan(vv.Must(vv.NewVersion(text)))
-			case tokenGte:
-				r = v1.GreaterThanOrEqual(vv.Must(vv.NewVersion(text)))
-			case tokenLte:
-				r = v1.LessThanOrEqual(vv.Must(vv.NewVersion(text)))
-
-			default:
-				panic("unknown p2 token")
 			}
 			stack.push(r)
 		case *logicExp:
