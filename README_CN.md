@@ -38,14 +38,15 @@ AI Infra Guard(AI Infrastructure Guard) 是一个**高效**、**轻量**、**易
 |            kubeflow |        4 |
 |              kubepi |        5 |
 |        llamafactory |        1 |
+|           llmstudio |        0 |
 |              ollama |        7 |
-|          open-webui |        7 |
+|          open-webui |        8 |
 |           pyload-ng |       18 |
 |           qanything |        2 |
 |             ragflow |        2 |
-|                 ray |        3 |
+|                 ray |        4 |
 |         tensorboard |        0 |
-|                vllm |        3 |
+|                vllm |        4 |
 |          xinference |        0 |
 
 
@@ -56,16 +57,18 @@ AI Infra Guard(AI Infrastructure Guard) 是一个**高效**、**轻量**、**易
 
 ![AI 安全扫描器演示](img/img.jpg)
 
-
-**AI分析**
-
-![AI 安全扫描器AI分析演示](img/output.gif)
+![](img/img2.png)
 
 ## 📦 安装与使用
 ### 安装
 下载地址: [https://github.com/Tencent/AI-Infra-Guard/releases](https://github.com/Tencent/AI-Infra-Guard/releases)
 
 ### 使用
+**本地一键检测**
+```
+./ai-infra-guard -localscan
+```
+
 **单个目标**
 ```
 ./ai-infra-guard -target [IP/域名] 
