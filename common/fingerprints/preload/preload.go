@@ -77,6 +77,9 @@ func (r *Runner) RunFpReqs(uri string, concurrent int, faviconHash int32) []FpRe
 						continue
 					}
 				}
+				if resp == nil {
+					continue
+				}
 				// 文件指纹
 				fpConfig := parser.Config{
 					Body:   resp.DataStr,
