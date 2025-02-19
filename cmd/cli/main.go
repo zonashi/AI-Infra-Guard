@@ -10,8 +10,8 @@ import (
 func main() {
 	parseOptions := options.ParseOptions() // 解析命令行参数
 	gologger.Logger.SetLevel(gologger.InfoLevel)
-	if parseOptions.WebSocket {
-		websocket.RunWebsocket(parseOptions)
+	if parseOptions.WebServer {
+		websocket.RunWebServer(parseOptions)
 	} else {
 		r, err := runner.New(parseOptions) // 创建runner
 		if err != nil {

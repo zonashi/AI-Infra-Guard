@@ -2,119 +2,52 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/Tencent/AI-Infra-Guard/common/runner"
+	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"github.com/Tencent/AI-Infra-Guard/internal/options"
 	"net/http"
-	"sync"
-
-	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
-
-	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // 允许所有来源
-	},
-}
-
-// WSServer WebSocket服务器结构
-type WSServer struct {
-	broadcast chan []byte
-	mu        sync.Mutex
-	options   *options.Options
-}
-
-// NewWSServer 创建新的WebSocket服务器
-func NewWSServer(options *options.Options) *WSServer {
-	return &WSServer{
-		options: options,
-	}
-}
-
-// HandleWS 处理WebSocket连接
-func (s *WSServer) HandleWS(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		gologger.Errorln("升级WebSocket连接失败: %v\n", err)
-		return
-	}
-	go s.handleMessages(conn)
-}
-
-// SendMessage 发送消息给指定客户端
-func (s *WSServer) SendMessage(conn *websocket.Conn, msgType string, content interface{}) error {
-	msg := WSMessage{
-		Type:    msgType,
-		Content: content,
-	}
-	data, err := json.Marshal(msg)
-	if err != nil {
-		return err
-	}
-	return conn.WriteMessage(websocket.TextMessage, data)
-}
-
-// handleMessages 处理来自客户端的消息
-func (s *WSServer) handleMessages(conn *websocket.Conn) {
-	for {
-		_, message, err := conn.ReadMessage()
+func RunWebServer(options *options.Options) {
+	// 创建WebSocket服务器
+	wsServer := NewWSServer(options)
+	// 设置WebSocket路由
+	http.HandleFunc("/ws", wsServer.HandleWS)
+	http.HandleFunc("/show", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		ops := options
+		ops.ListVulTemplate = true
+		ops.ListFpsTemplate = true
+		instance, err := runner.New(ops) // 创建runner
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				gologger.Errorf("读取消息错误: %v\n", err)
+			ret := Response{
+				Status:  1,
+				Message: err.Error(),
+				Data:    nil,
 			}
-			break
+			resp, err := json.Marshal(&ret)
+			if err != nil {
+				gologger.Errorln(err)
+			}
+			w.Write(resp)
+			return
 		}
-		var scanReq ScanRequest
-		if err := json.Unmarshal(message, &scanReq); err != nil {
-			fmt.Printf("解析消息失败: %v\n", err)
-			continue
-		}
-		resp := Response{
+		defer instance.Close() // 关闭runner
+		ret := Response{
 			Status:  0,
 			Message: "success",
+			Data:    instance.GetFpAndVulList(),
 		}
-		err = s.SendMessage(conn, WSMsgTypeScanRet, resp)
+		resp, err := json.Marshal(&ret)
 		if err != nil {
-			gologger.Errorf("发送消息失败: %v\n", err)
-			continue
+			gologger.Errorln(err)
 		}
-		// 处理扫描请求
-		go s.handleScanRequest(conn, &scanReq)
-	}
-}
-
-// handleScanRequest 处理扫描请求
-func (s *WSServer) handleScanRequest(conn *websocket.Conn, req *ScanRequest) {
-	opts := s.options
-	switch req.ScanType {
-	case "localscan":
-		opts.LocalScan = true
-	case "netscan":
-		opts.Target = req.Target
-	}
-	processFunc := func(data interface{}) {
-		switch v := data.(type) {
-		case runner.CallbackScanResult:
-			s.SendMessage(conn, WSMsgTypeScanResult, v)
-		case runner.CallbackProcessInfo:
-			s.SendMessage(conn, WSMsgTypeProcessInfo, v)
-		case runner.CallbackReportInfo:
-			s.SendMessage(conn, WSMsgTypeReportInfo, v)
-		default:
-			gologger.Errorf("processFunc unknown type: %T\n", v)
-		}
-	}
-	opts.SetCallback(processFunc)
-	r, err := runner.New(opts) // 创建runner
-	if err != nil {
-		s.SendMessage(conn, WSMsgTypeLog, Log{
-			Message: "Counld not create runner:" + err.Error(),
-			Level:   "error",
-		})
+		w.Write(resp)
 		return
+	})
+	// 启动HTTP服务器
+	gologger.Infof("Starting WebServer on %s\n", options.WebServerAddr)
+	if err := http.ListenAndServe(options.WebServerAddr, nil); err != nil {
+		gologger.Fatalf("Could not start WebSocket server: %s\n", err)
 	}
-	defer r.Close()    // 关闭runner
-	r.RunEnumeration() // 执行枚举
 }
