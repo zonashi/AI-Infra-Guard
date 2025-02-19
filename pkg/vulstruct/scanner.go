@@ -12,13 +12,13 @@ import (
 // Info represents vulnerability information structure
 // 存储漏洞信息的结构体
 type Info struct {
-	FingerPrintName string `yaml:"name"`                      // Name of the fingerprint
-	CVEName         string `yaml:"cve"`                       // CVE identifier
-	Summary         string `yaml:"summary"`                   // Brief summary of the vulnerability
-	Details         string `yaml:"details"`                   // Detailed description
-	CVSS            string `yaml:"cvss"`                      // CVSS score
-	Severity        string `yaml:"severity"`                  // Severity level
-	SecurityAdvise  string `yaml:"security_advise,omitempty"` // Security advisory
+	FingerPrintName string `yaml:"name" json:"-"`                                    // Name of the fingerprint
+	CVEName         string `yaml:"cve" json:"cve"`                                   // CVE identifier
+	Summary         string `yaml:"summary" json:"summary"`                           // Brief summary of the vulnerability
+	Details         string `yaml:"details" json:"details"`                           // Detailed description
+	CVSS            string `yaml:"cvss" json:"cvss"`                                 // CVSS score
+	Severity        string `yaml:"severity" json:"severity"`                         // Severity level
+	SecurityAdvise  string `yaml:"security_advise,omitempty" json:"security_advise"` // Security advisory
 }
 
 // VersionVul represents a version-based vulnerability
