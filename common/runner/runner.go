@@ -519,13 +519,15 @@ func (r *Runner) writeResult(f *os.File, result HttpResult) {
 				fpString += ":" + fp.Version
 			}
 		}
-		r.Options.Callback(CallbackScanResult{
-			TargetURL:       result.URL,
-			StatusCode:      result.StatusCode,
-			Title:           result.Title,
-			Fingerprint:     fpString,
-			Vulnerabilities: vuls,
-		})
+		if r.Options.Callback != nil {
+			r.Options.Callback(CallbackScanResult{
+				TargetURL:       result.URL,
+				StatusCode:      result.StatusCode,
+				Title:           result.Title,
+				Fingerprint:     fpString,
+				Vulnerabilities: vuls,
+			})
+		}
 	}
 	if len(result.Advisories) > 0 {
 		fmt.Println("\n存在漏洞:")

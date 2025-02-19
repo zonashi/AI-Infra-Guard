@@ -61,9 +61,6 @@ func (s *WSServer) handleMessages(conn *websocket.Conn) {
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				gologger.Errorf("读取消息错误: %v\n", err)
-			}
 			break
 		}
 		var scanReq ScanRequest
@@ -94,7 +91,10 @@ func (s *WSServer) handleScanRequest(conn *websocket.Conn, req *ScanRequest) {
 	case "netscan":
 		opts.Target = req.Target
 	}
+	mu := sync.Mutex{}
 	processFunc := func(data interface{}) {
+		mu.Lock()
+		defer mu.Unlock()
 		switch v := data.(type) {
 		case runner.CallbackScanResult:
 			s.SendMessage(conn, WSMsgTypeScanResult, v)
