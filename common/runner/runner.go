@@ -568,34 +568,54 @@ func (r *Runner) writeResult(f *os.File, result HttpResult) {
 	}
 }
 
-// ShowFpAndVulList displays the list of available fingerprints and vulnerabilities
-// 显示指纹和漏洞列表
-func (r *Runner) ShowFpAndVulList(fps, vul bool) {
+// GetFpAndVulList 获取指纹和漏洞列表
+func (r *Runner) GetFpAndVulList() []FpInfos {
 	fingerprints := make([]string, 0)
 	for _, fp := range r.fpEngine.GetFps() {
 		fingerprints = append(fingerprints, fp.Info.Name)
 	}
-	if fps {
-		if len(fingerprints) > 0 {
-			gologger.Infof("指纹列表: %v", fingerprints)
+	fps := make([]FpInfos, 0)
+	for _, fp := range fingerprints {
+		ads, err := r.advEngine.GetAdvisories(fp, "", false)
+		if err != nil {
+			gologger.WithError(err).Errorln("获取漏洞列表失败", fp)
+			continue
+		}
+		fps = append(fps, FpInfos{
+			FpName: fp,
+			Vuls:   ads,
+		})
+	}
+	return fps
+}
 
+// ShowFpAndVulList displays the list of available fingerprints and vulnerabilities
+// 显示指纹和漏洞列表
+func (r *Runner) ShowFpAndVulList(fps, vul bool) {
+	data := r.GetFpAndVulList()
+
+	if fps {
+		if len(data) > 0 {
+			fingerprints := make([]string, 0)
+			for _, item := range data {
+				fingerprints = append(fingerprints, item.FpName)
+			}
+			gologger.Infof("指纹列表: %v", fingerprints)
 		} else {
 			gologger.Infof("没有指纹")
 		}
 	}
 	if vul {
 		gologger.Infoln("漏洞列表:")
-		mark := strings.Builder{}
-		mark.WriteString("| 组件名称            | 漏洞数量 |\n|---------------------|----------|\n")
-		for _, fp := range fingerprints {
-			ads, err := r.advEngine.GetAdvisories(fp, "", false)
-			if err != nil {
-				gologger.WithError(err).Errorln("获取漏洞列表失败", fp)
-				continue
-			}
-			mark.WriteString(fmt.Sprintf("| %19s | %8d |\n", fp, len(ads)))
+		table, err := gotable.Create("组件名称", "漏洞数量")
+		if err != nil {
+			gologger.Errorf("create table error: %v", err)
+			return
 		}
-		fmt.Println(mark.String())
+		for _, item := range data {
+			table.AddRow([]string{item.FpName, strconv.Itoa(len(item.Vuls))})
+		}
+		fmt.Println(table)
 	}
 }
 

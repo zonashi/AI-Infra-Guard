@@ -24,10 +24,10 @@ type Info struct {
 // VersionVul represents a version-based vulnerability
 // 版本相关的漏洞结构体
 type VersionVul struct {
-	Info        Info         `yaml:"info"`       // Basic vulnerability information
-	Rule        string       `yaml:"rule"`       // Rule expression in string format
-	RuleCompile *parser.Rule `yaml:"-"`          // Compiled rule for evaluation
-	References  []string     `yaml:"references"` // Reference links
+	Info        Info         `yaml:"info" json:"info"`             // Basic vulnerability information
+	Rule        string       `yaml:"rule" json:"-"`                // Rule expression in string format
+	RuleCompile *parser.Rule `yaml:"-" json:"-"`                   // Compiled rule for evaluation
+	References  []string     `yaml:"references" json:"references"` // Reference links
 }
 
 // ReadVersionVulSingFile reads and parses a single vulnerability file

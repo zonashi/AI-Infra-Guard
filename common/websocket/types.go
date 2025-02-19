@@ -28,8 +28,9 @@ type ScanRequest struct {
 
 // Response 基础响应结构
 type Response struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 // WSMessage WebSocket消息结构

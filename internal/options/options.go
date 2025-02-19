@@ -26,8 +26,8 @@ type Options struct {
 	AIAnalysis      bool              // 是否启用AI分析
 	AIToken         string            // AI服务的认证令牌
 	LocalScan       bool              // 一键检测本地
-	WebSocket       bool              // 是否启用WebSocket服务器
-	WebSocketAddr   string            // WebSocket服务器地址
+	WebServer       bool              // 是否启用WebSocket服务器
+	WebServerAddr   string            // WebSocket服务器地址
 	Callback        func(interface{}) // 回调函数
 }
 
@@ -62,8 +62,8 @@ func ParseOptions() *Options {
 	flag.BoolVar(&options.AIAnalysis, "ai", false, "AI分析")
 	flag.StringVar(&options.AIToken, "token", "", "混元token")
 	flag.BoolVar(&options.LocalScan, "localscan", false, "一键检测本地")
-	flag.BoolVar(&options.WebSocket, "ws", false, "启用WebSocket服务器")
-	flag.StringVar(&options.WebSocketAddr, "ws-addr", "127.0.0.1:8088", "WebSocket服务器地址")
+	flag.BoolVar(&options.WebServer, "ws", false, "启用WebServer服务器")
+	flag.StringVar(&options.WebServerAddr, "ws-addr", "127.0.0.1:8088", "WebSocket服务器地址")
 	flag.Parse()
 	options.configureOutput()
 	ShowBanner()

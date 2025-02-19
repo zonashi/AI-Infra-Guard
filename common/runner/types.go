@@ -24,3 +24,8 @@ type CallbackReportInfo struct {
 	MediumRisk int `json:"medium_risk"`
 	LowRisk    int `json:"low_risk"`
 }
+
+type FpInfos struct {
+	FpName string                 `json:"name"`
+	Vuls   []vulstruct.VersionVul `json:"vuls"`
+}
