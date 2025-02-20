@@ -226,6 +226,7 @@ func (r *Runner) initComponents() error {
 		Unsafe:           false,
 		DefaultUserAgent: httpx.GetRandomUserAgent(),
 		Dialer:           dialer,
+		CustomHeaders:    r.Options.Headers,
 	}
 
 	// 创建HTTP客户端
