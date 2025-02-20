@@ -91,6 +91,9 @@ func (r *Runner) initFingerprints() error {
 			gologger.Fatalf("无法扫描指纹模板目录:%s", options2.FPTemplates)
 		}
 		for _, filename := range files {
+			if !strings.HasSuffix(filename, ".yaml") {
+				continue
+			}
 			data, err := os.ReadFile(filename)
 			if err != nil {
 				gologger.Fatalf("无法读取指纹模板文件:%s", filename)
