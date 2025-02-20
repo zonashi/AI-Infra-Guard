@@ -16,4 +16,5 @@ type HTTPOptions struct {
 	Unsafe           bool
 	DefaultUserAgent string
 	Dialer           *fastdialer.Dialer
+	CustomHeaders    []string
 }

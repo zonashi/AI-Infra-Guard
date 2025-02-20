@@ -28,6 +28,7 @@ type Options struct {
 	LocalScan       bool              // 一键检测本地
 	WebServer       bool              // 是否启用WebSocket服务器
 	WebServerAddr   string            // WebSocket服务器地址
+	Headers         multiStringFlag   // HTTP请求头
 	Callback        func(interface{}) // 回调函数
 }
 
@@ -53,6 +54,7 @@ func ParseOptions() *Options {
 	flag.StringVar(&options.Output, "o", "", "输出的文件")
 	flag.IntVar(&options.TimeOut, "timeout", 5, "超时时间(s)")
 	flag.StringVar(&options.ProxyURL, "proxy-url", "", "代理url")
+	flag.Var(&options.Headers, "header", "HTTP请求头,可以指定多个请求头 eg:-header \"key:value\" -header \"key:value\"")
 	flag.IntVar(&options.RateLimit, "limit", 200, "限制每秒的并发数量")
 	flag.StringVar(&options.FPTemplates, "fps", "data/fingerprints", "指定指纹文件或目录")
 	flag.StringVar(&options.AdvTemplates, "vul", "data/vuln", "指定漏洞库目录")

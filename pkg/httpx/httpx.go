@@ -77,7 +77,13 @@ func NewHttpx(options *HTTPOptions) (*HTTPX, error) {
 		Timeout: httpx.Options.Timeout,
 	}
 
-	//httpx.CustomHeaders = httpx.Options.CustomHeaders
+	httpx.CustomHeaders = make(map[string]string)
+	for _, item := range options.CustomHeaders {
+		splits := strings.SplitN(item, ":", 2)
+		if splits != nil && len(splits) == 2 {
+			httpx.CustomHeaders[splits[0]] = splits[1]
+		}
+	}
 	return httpx, nil
 }
 
@@ -171,6 +177,9 @@ func (h *HTTPX) newRequest(method, targetURL string, body interface{}) (req *ret
 		req.Header.Set("User-Agent", h.Options.DefaultUserAgent)
 		// set default encoding to accept utf8
 		req.Header.Add("Accept-Charset", "utf-8")
+		for k, v := range h.CustomHeaders {
+			req.Header.Set(k, v)
+		}
 	}
 	return
 }
