@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  webserver:
+    image: mirrors.tencent.com/aig/aig-server:0.1
+    container_name: ai-infra-guard-webserver
+    ports:
+      - "8088:8088"
+    environment:
+      - APP_ENV=production
+      - UPLOAD_DIR=/ai-infra-guard/uploads
+      - DB_PATH=/ai-infra-guard/db/tasks.db
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./data:/ai-infra-guard/data
+      - ./db:/ai-infra-guard/db
+    networks:
+      - ai-infra-guard-network
+    healthcheck:
+      test: [ "CMD", "curl",  "http://localhost:8088/" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  agent:
+    image: mirrors.tencent.com/aig/aig-agent:0.1
+    container_name: ai-infra-guard-agent
+    environment:
+      - TZ=Asia/Shanghai
+      - AIG_SERVER=webserver:8088  # agent需要与webserver通信
+    networks:
+      - ai-infra-guard-network
+    depends_on:
+      - webserver
+networks:
+  ai-infra-guard-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
