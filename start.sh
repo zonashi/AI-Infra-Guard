@@ -28,4 +28,4 @@ chmod 666 /ai-infra-guard/logs/trpc.log 2>/dev/null || true
 chmod 777 /ai-infra-guard/logs 2>/dev/null || true
 
 echo 启动AI-Infra-Guard Web 服务...
-exec ./ai-infra-guard webserver 
+exec ./ai-infra-guard webserver --server 0.0.0.0:8088
