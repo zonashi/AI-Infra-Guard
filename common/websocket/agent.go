@@ -17,9 +17,9 @@ import (
 const (
 	// WebSocket相关常量
 	maxMessageSize    = 512 * 1024 * 1024 // 512MB
-	pongWait          = 60 * time.Second
-	pingPeriod        = (pongWait * 9) / 10
-	writeWait         = 10 * time.Second
+	pongWait          = 120 * time.Second
+	pingPeriod        = (pongWait * 8) / 10
+	writeWait         = 60 * time.Second
 	WSMsgTypeRegister = "register"
 	// WSMsgTypeTaskAssign = "task_assign" // 任务分配
 	WSMsgTypeDisconnect = "disconnect" // 主动断开连接的消息类型
@@ -173,7 +173,6 @@ func (ac *AgentConnection) handleConnection(am *AgentManager) {
 
 	// 设置连接参数
 	ac.conn.SetReadLimit(maxMessageSize)
-	ac.conn.SetReadDeadline(time.Now().Add(pongWait))
 	ac.conn.SetPongHandler(func(string) error {
 		ac.conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
@@ -488,11 +487,7 @@ func (ac *AgentConnection) handleAgentEvent(am *AgentManager, content interface{
 
 	// 转发给 TaskManager 处理
 	am.mu.RLock()
-	if am.taskManager != nil {
-		am.taskManager.HandleAgentEvent(sessionId, eventType, event)
-	} else {
-		log.Errorf("TaskManager未初始化，无法处理Agent事件: agentId=%s, sessionId=%s", ac.agentID, sessionId)
-	}
+	am.taskManager.HandleAgentEvent(sessionId, eventType, event)
 	am.mu.RUnlock()
 }
 

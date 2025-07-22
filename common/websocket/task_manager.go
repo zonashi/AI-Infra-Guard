@@ -15,6 +15,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Tencent/AI-Infra-Guard/common/agent"
+
 	"github.com/Tencent/AI-Infra-Guard/pkg/database"
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
@@ -77,7 +79,7 @@ func (tm *TaskManager) AddTask(req *TaskCreateRequest, traceID string) error {
 	session := &database.Session{
 		ID:             req.SessionID,
 		Username:       req.Username,
-		Title:          tm.generateTaskTitle(req.Content, req.Attachments),
+		Title:          tm.generateTaskTitle(req),
 		TaskType:       req.Task,
 		Content:        req.Content,
 		Params:         mustMarshalJSON(req.Params),
@@ -746,26 +748,114 @@ func (tm *TaskManager) GetUserTasks(username string, traceID string) ([]map[stri
 	return tasks, nil
 }
 
-// generateTaskTitle 生成任务标题（用于任务创建API）
-func (tm *TaskManager) generateTaskTitle(content string, attachments []string) string {
-	// 如果content不为空，使用content作为title（截取前50个字符）
-	if strings.TrimSpace(content) != "" {
-		// 使用rune来正确处理UTF-8字符，避免截断中文字符
-		runes := []rune(content)
-		if len(runes) > 50 {
-			return string(runes[:50])
+// SearchUserTasksSimple 使用简化参数搜索指定用户的任务，支持单个查询关键词和分页
+func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams database.SimpleSearchParams, traceID string) (map[string]interface{}, error) {
+	log.Infof("开始简化搜索用户任务: trace_id=%s, username=%s, query=%s", traceID, username, searchParams.Query)
+
+	// 验证和设置默认分页参数
+	if searchParams.Page < 1 {
+		searchParams.Page = 1
+	}
+	if searchParams.PageSize < 1 {
+		searchParams.PageSize = 10
+	}
+	if searchParams.PageSize > 100 {
+		searchParams.PageSize = 100 // 限制最大页面大小
+	}
+
+	// 从数据库搜索用户的任务列表
+	sessions, total, err := tm.taskStore.SearchUserSessionsSimple(username, searchParams)
+	if err != nil {
+		log.Errorf("简化搜索用户任务失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
+		return nil, fmt.Errorf("搜索任务失败: %v", err)
+	}
+
+	// 转换为前端需要的格式
+	var tasks []map[string]interface{}
+	for _, session := range sessions {
+		task := map[string]interface{}{
+			"sessionId":      session.ID,
+			"title":          session.Title,
+			"taskType":       session.TaskType,
+			"status":         session.Status,
+			"countryIsoCode": session.CountryIsoCode,
+			"updatedAt":      session.UpdatedAt, // 直接使用时间戳毫秒级
+			"createdAt":      session.CreatedAt, // 任务创建时间
 		}
-		return content
+
+		// 添加完成时间（如果任务已完成）
+		if session.CompletedAt != nil {
+			task["completedAt"] = *session.CompletedAt
+		} else {
+			task["completedAt"] = nil
+		}
+
+		tasks = append(tasks, task)
 	}
 
+	// 计算分页信息
+	totalPages := (int(total) + searchParams.PageSize - 1) / searchParams.PageSize
+
+	result := map[string]interface{}{
+		"tasks": tasks,
+		"pagination": map[string]interface{}{
+			"page":       searchParams.Page,
+			"pageSize":   searchParams.PageSize,
+			"total":      total,
+			"totalPages": totalPages,
+		},
+	}
+
+	log.Infof("搜索用户任务成功: trace_id=%s, username=%s, query=%s, total=%d, pageCount=%d", traceID, username, searchParams.Query, total, len(tasks))
+	return result, nil
+}
+
+// generateTaskTitle 生成任务标题（用于任务创建API）
+func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
+	ret := ""
+	var ModelName = ""
+	if modelID, exists := req.Params["model_id"]; exists {
+		if modelIDStr, ok := modelID.(string); ok && strings.TrimSpace(modelIDStr) != "" {
+			// 从数据库获取模型信息
+			model, err := tm.modelStore.GetModel(modelIDStr)
+			if err == nil {
+				ModelName = model.ModelName
+			}
+		}
+	}
+	// 1. AI基础 ip/域名 ，文件形式：取第一行等xx个
+	// 2. MCP：文件名以文件展示，github取项目名，sse取链接
+	// 3. 评测：模型名 eg：qwen3模型评测任务
+	// 4. 一键越狱：模型名+prompt
+	switch req.Task {
+	case agent.TaskTypeAIInfraScan:
+		ret = "AI基础设施扫描 - "
+		if len(req.Attachments) > 0 && req.Attachments[0] != "" {
+			ret += tm.extractFileNameFromURL(req.Attachments[0])
+		}
+		if req.Content != "" {
+			ret += req.Content
+		}
+	case agent.TaskTypeMcpScan:
+		ret = "MCP扫描 - "
+		if len(req.Attachments) > 0 && req.Attachments[0] != "" {
+			// 直接调用现有的extractFileNameFromURL方法
+			ret += tm.extractFileNameFromURL(req.Attachments[0])
+		}
+		if strings.Contains(ret, "github.com") {
+			ret += "Github:" + tm.extractFileNameFromURL(req.Content)
+		} else if strings.Contains(ret, "sse") {
+			ret += "SSE:" + req.Content
+		}
+	case agent.TaskTypeModelJailbreak:
+		ret = "一键越狱任务 - " + fmt.Sprintf("模型:%s, prompt:%s", ModelName, req.Content)
+	case agent.TaskTypeModelRedteamReport:
+		ret = ModelName + "模型评测任务"
+	default:
+		ret = "其他任务 - " + req.Content
+	}
 	// 如果content为空，尝试从附件中提取第一个URL的文件名作为title
-	if len(attachments) > 0 && attachments[0] != "" {
-		// 直接调用现有的extractFileNameFromURL方法
-		return tm.extractFileNameFromURL(attachments[0])
-	}
-
-	// 如果都没有，返回默认标题
-	return "模型越狱评测任务"
+	return ret
 }
 
 // 辅助函数：将interface{}转换为datatypes.JSON
@@ -907,7 +997,6 @@ func (tm *TaskManager) extractFileNameFromURL(url string) string {
 		parts := strings.Split(url, "/")
 		if len(parts) > 0 {
 			fileName := parts[len(parts)-1]
-
 			// 新的文件名格式: UUID_原始文件名.扩展名
 			if strings.Contains(fileName, "_") {
 				// 查找第一个下划线，之后的部分是原始文件名
@@ -917,7 +1006,6 @@ func (tm *TaskManager) extractFileNameFromURL(url string) string {
 					return fileName[firstUnderscoreIndex+1:]
 				}
 			}
-
 			// 如果没有下划线，直接返回文件名
 			return fileName
 		}

@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+
+	"github.com/Tencent/AI-Infra-Guard/pkg/database"
 
 	"github.com/gin-gonic/gin"
 	"trpc.group/trpc-go/trpc-go/log"
@@ -208,7 +211,7 @@ func HandleTaskCreate(c *gin.Context, tm *TaskManager) {
 	log.Infof("任务创建成功: trace_id=%s, sessionId=%s, username=%s", traceID, req.SessionID, username)
 
 	// 生成任务标题
-	title := tm.generateTaskTitle(req.Content, req.Attachments)
+	title := tm.generateTaskTitle(&req)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
@@ -463,6 +466,64 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 		"data": gin.H{
 			"tasks": tasks,
 		},
+	})
+}
+
+// HandleSearchTasks 搜索任务接口（简化版本，只使用q参数）
+func HandleSearchTasks(c *gin.Context, tm *TaskManager) {
+	traceID := getTraceID(c)
+	// 从中间件获取用户名
+	username := c.GetString("username")
+
+	log.Infof("开始搜索任务: trace_id=%s, username=%s", traceID, username)
+
+	// 解析简化的搜索参数
+	var searchParams database.SimpleSearchParams
+
+	// 从查询字符串获取搜索关键词
+	searchParams.Query = c.Query("q")
+
+	// 解析分页参数
+	if page := c.Query("page"); page != "" {
+		if pageInt, err := strconv.Atoi(page); err == nil && pageInt > 0 {
+			searchParams.Page = pageInt
+		} else {
+			searchParams.Page = 1
+		}
+	} else {
+		searchParams.Page = 1
+	}
+
+	if pageSize := c.Query("page_size"); pageSize != "" {
+		if pageSizeInt, err := strconv.Atoi(pageSize); err == nil && pageSizeInt > 0 {
+			searchParams.PageSize = pageSizeInt
+		} else {
+			searchParams.PageSize = 10
+		}
+	} else {
+		searchParams.PageSize = 10
+	}
+
+	log.Infof("搜索参数: trace_id=%s, username=%s, query=%s, page=%d, pageSize=%d", traceID, username, searchParams.Query, searchParams.Page, searchParams.PageSize)
+
+	// 调用TaskManager进行简化搜索
+	result, err := tm.SearchUserTasksSimple(username, searchParams, traceID)
+	if err != nil {
+		log.Errorf("搜索任务失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
+		c.JSON(http.StatusOK, gin.H{
+			"status":  1,
+			"message": "搜索任务失败: " + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	log.Infof("搜索任务成功: trace_id=%s, username=%s", traceID, username)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  0,
+		"message": "搜索任务成功",
+		"data":    result,
 	})
 }
 

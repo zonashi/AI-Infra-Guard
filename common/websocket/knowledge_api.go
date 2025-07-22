@@ -1,12 +1,5 @@
 package websocket
 
-// 本文件用于实现知识库（指纹库、漏洞库）相关的API接口。
-// 后续可在此文件中实现指纹库、漏洞库的增删改查、分页、条件查询等接口。
-
-// TODO: 实现指纹库和漏洞库相关的API接口。
-
-// 替换为实际指纹结构体路径
-
 import (
 	"fmt"
 	"net/http"
@@ -166,12 +159,12 @@ func HandleCreateFingerprint(c *gin.Context) {
 
 // 批量删除指纹处理函数
 type BatchDeleteRequest struct {
-	Names []string `json:"names"`
+	Name []string `json:"name"`
 }
 
 func HandleDeleteFingerprint(c *gin.Context) {
 	var req BatchDeleteRequest
-	if err := c.ShouldBindJSON(&req); err != nil || len(req.Names) == 0 {
+	if err := c.ShouldBindJSON(&req); err != nil || len(req.Name) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "参数错误", "data": nil})
 		return
 	}
@@ -180,7 +173,7 @@ func HandleDeleteFingerprint(c *gin.Context) {
 	var notFound []string
 	var invalid []string
 
-	for _, name := range req.Names {
+	for _, name := range req.Name {
 		// 使用已存在的合法性校验函数防止路径遍历攻击
 		if !isValidName(name) {
 			invalid = append(invalid, name)

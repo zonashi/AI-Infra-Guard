@@ -226,6 +226,45 @@ func (s *TaskStore) GetSessionEventsByType(sessionID string, eventType string) (
 	return messages, nil
 }
 
+// SearchUserSessionsSimple 使用单个查询参数搜索用户的会话，支持在title、content、task_type字段中搜索
+func (s *TaskStore) SearchUserSessionsSimple(username string, searchParams SimpleSearchParams) ([]*Session, int64, error) {
+	query := s.db.Model(&Session{}).Where("username = ?", username)
+
+	// 如果有查询关键词，在多个字段中搜索
+	if searchParams.Query != "" {
+		query = query.Where("title LIKE ? OR content LIKE ? OR task_type LIKE ?",
+			"%"+searchParams.Query+"%",
+			"%"+searchParams.Query+"%",
+			"%"+searchParams.Query+"%")
+	}
+
+	// 获取总数
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 应用分页和排序
+	var sessions []*Session
+	err := query.Order("created_at DESC").
+		Offset((searchParams.Page - 1) * searchParams.PageSize).
+		Limit(searchParams.PageSize).
+		Find(&sessions).Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return sessions, total, nil
+}
+
+// SimpleSearchParams 简化搜索参数结构
+type SimpleSearchParams struct {
+	Query    string `json:"query"`     // 查询关键词，将在title、content、task_type字段中搜索
+	Page     int    `json:"page"`      // 页码
+	PageSize int    `json:"page_size"` // 每页大小
+}
+
 // generateMessageID 生成消息ID
 func generateMessageID() string {
 	return time.Now().Format("20060102150405") + "_" + fmt.Sprintf("%d", time.Now().UnixNano())

@@ -24,8 +24,6 @@ func RunWebServer(options *options.Options) {
 	log.Infof("Trpc-go initialized successfully: trace_id=system_startup")
 
 	r := gin.Default()
-	wsServer := NewWSServer(options)
-
 	// 2. 添加中间件
 	r.Use(middleware.TrpcMiddleware())
 	r.Use(middleware.RequestLoggerMiddleware()) // 添加请求参数日志中间件
@@ -80,9 +78,6 @@ func RunWebServer(options *options.Options) {
 		// 1. 知识库模块
 		knowledge := v1.Group("/knowledge")
 		{
-			// 对抗样本库
-			knowledge.Group("/samples")
-
 			// AI应用指纹
 			fingerprints := knowledge.Group("/fingerprints")
 			{
@@ -103,20 +98,6 @@ func RunWebServer(options *options.Options) {
 				vulnerabilities.DELETE("", HandleBatchDeleteVulnerabilities)
 			}
 		}
-
-		// 2. 模型安全中心
-		modelSecurity := v1.Group("/model-security")
-		{
-			// 任务管理
-			modelSecurity.Group("/tasks")
-
-			// WebSocket 连接 (原有 /ws 接口迁移)
-			modelSecurity.GET("/ws", func(c *gin.Context) {
-				wsServer.HandleAIInfraWS(c.Writer, c.Request)
-			})
-		}
-
-		// 3. AI应用安全中心
 		appSecurity := v1.Group("/app")
 		{
 			appSecurity.Use(setupIdentityMiddleware())
@@ -127,6 +108,10 @@ func RunWebServer(options *options.Options) {
 				// 获取任务列表接口
 				tasks.GET("", func(c *gin.Context) {
 					HandleGetTaskList(c, taskManager)
+				})
+				// 搜索任务接口
+				tasks.GET("/search", func(c *gin.Context) {
+					HandleSearchTasks(c, taskManager)
 				})
 				// 获取任务详情接口
 				tasks.GET("/:sessionId", func(c *gin.Context) {
@@ -220,15 +205,6 @@ func RunWebServer(options *options.Options) {
 		c.Data(200, mimeType, assetData)
 	})
 
-	// 添加文件访问路由 - 确保上传的文件可以被访问
-	// 注释掉静态文件映射，因为我们已经有了专门的下载接口
-	// if fileConfig.BaseURL != "" {
-	// 	// 设置静态文件服务，将URL路径映射到实际存储目录
-	// 	r.Static(fileConfig.BaseURL, fileConfig.UploadDir)
-	// 	gologger.Infof("文件访问路由已配置: %s -> %s", fileConfig.BaseURL, fileConfig.UploadDir)
-	// }
-
-	// 启动服务器
 	log.Infof("Starting WebServer: trace_id=system_startup, addr=%s", options.WebServerAddr)
 	if err := r.Run(options.WebServerAddr); err != nil {
 		log.Errorf("Could not start WebSocket server: trace_id=system_startup, error=%s", err)
