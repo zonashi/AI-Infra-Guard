@@ -5,3 +5,6 @@ dist
 test_prompt.txt
 cmd/internal
 temp_uploads
+logs
+db
+uploads
