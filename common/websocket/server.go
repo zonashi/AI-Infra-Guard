@@ -48,6 +48,8 @@ func RunWebServer(options *options.Options) {
 		log.Errorf("初始化models表失败: trace_id=system_startup, error=%v", err)
 
 	}
+	// 自动添加模型
+	modelStore.AutoAddModels()
 
 	// 初始化AgentManager
 	agentManager := NewAgentManager()
@@ -92,8 +94,8 @@ func RunWebServer(options *options.Options) {
 			vulnerabilities := knowledge.Group("/vulnerabilities")
 			{
 				// 管理功能
-				vulnerabilities.GET("", HandleListVulnerabilities(options))
-				vulnerabilities.POST("", HandleCreateVulnerability(options))
+				vulnerabilities.GET("", HandleListVulnerabilities())
+				vulnerabilities.POST("", HandleCreateVulnerability())
 				vulnerabilities.PUT("/:cve", HandleEditVulnerability)
 				vulnerabilities.DELETE("", HandleBatchDeleteVulnerabilities)
 			}

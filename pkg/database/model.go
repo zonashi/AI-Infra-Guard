@@ -1,6 +1,7 @@
 package database
 
 import (
+	"os"
 	"time"
 
 	"gorm.io/gorm"
@@ -114,4 +115,30 @@ func (s *ModelStore) CheckModelExistsByUser(modelID string, username string) (bo
 	var count int64
 	err := s.db.Model(&Model{}).Where("model_id = ? AND username = ?", modelID, username).Count(&count).Error
 	return count > 0, err
+}
+
+func (s *ModelStore) AutoAddModels() {
+	// 判断如果模型为空，并且环境变量存在 model token base_url，则自动添加模型
+	if s.db == nil {
+		return
+	}
+	var count int64
+	s.db.Model(&Model{}).Count(&count)
+	if count == 0 {
+		model := os.Getenv("MODEL")
+		token := os.Getenv("TOKEN")
+		baseUrl := os.Getenv("BASE_URL")
+		if model != "" && token != "" && baseUrl != "" {
+			s.CreateModel(&Model{
+				ModelID:   "system_default",
+				Username:  "",
+				ModelName: model,
+				Token:     token,
+				BaseURL:   baseUrl,
+				Note:      "系统默认内置",
+				CreatedAt: time.Now().UnixMilli(),
+				UpdatedAt: time.Now().UnixMilli(),
+			})
+		}
+	}
 }

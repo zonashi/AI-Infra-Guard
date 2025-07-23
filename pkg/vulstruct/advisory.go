@@ -126,3 +126,9 @@ func (ae *AdvisoryEngine) GetAdvisories(packageName, version string, isInternal 
 func (ae *AdvisoryEngine) GetCount() int {
 	return len(ae.ads)
 }
+
+// GetAll 获取所有漏洞建议
+// 返回: 漏洞建议列表和可能的错误
+func (ae *AdvisoryEngine) GetAll() []VersionVul {
+	return ae.ads
+}

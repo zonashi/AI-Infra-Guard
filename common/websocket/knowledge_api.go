@@ -10,9 +10,6 @@ import (
 	"strings"
 
 	"github.com/Tencent/AI-Infra-Guard/common/fingerprints/parser"
-	"github.com/Tencent/AI-Infra-Guard/common/runner"
-	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
-	"github.com/Tencent/AI-Infra-Guard/internal/options"
 	"github.com/Tencent/AI-Infra-Guard/pkg/vulstruct"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v3"
@@ -29,7 +26,7 @@ func isValidName(name string) bool {
 func HandleListFingerprints(c *gin.Context) {
 	// 1. 解析分页参数
 	pageStr := c.DefaultQuery("page", "1")
-	sizeStr := c.DefaultQuery("size", "10")
+	sizeStr := c.DefaultQuery("size", "20")
 	page, _ := strconv.Atoi(pageStr)
 	size, _ := strconv.Atoi(sizeStr)
 	if page < 1 {
@@ -40,9 +37,7 @@ func HandleListFingerprints(c *gin.Context) {
 	}
 
 	// 2. 获取查询参数
-	nameQuery := strings.ToLower(c.DefaultQuery("name", ""))
-	// severityQuery := strings.ToLower(c.DefaultQuery("severity", ""))
-	// categoryQuery := strings.ToLower(c.DefaultQuery("category", ""))
+	nameQuery := strings.ToLower(c.DefaultQuery("q", ""))
 
 	// 3. 读取 data/fingerprints/ 下所有分类和YAML文件
 	var allFingerprints []parser.FingerPrint
@@ -64,22 +59,21 @@ func HandleListFingerprints(c *gin.Context) {
 	// 4. 条件过滤
 	var filteredFingerprints []parser.FingerPrint
 	for _, fp := range allFingerprints {
-		// name模糊匹配
-		if nameQuery != "" && !strings.Contains(strings.ToLower(fp.Info.Name), nameQuery) {
+		if nameQuery == "" {
 			continue
 		}
-		// severity等值匹配
-		// if severityQuery != "" && strings.ToLower(fp.Info.Severity) != severityQuery {
-		// 	continue
-		// }
-		// // category等值匹配（在metadata中查找）
-		// if categoryQuery != "" {
-		// 	cat, ok := fp.Info.Metadata["category"]
-		// 	if !ok || strings.ToLower(cat) != categoryQuery {
-		// 		continue
-		// 	}
-		// }
-		filteredFingerprints = append(filteredFingerprints, fp)
+		if strings.Contains(strings.ToLower(fp.Info.Name), nameQuery) {
+			filteredFingerprints = append(filteredFingerprints, fp)
+			continue
+		}
+		if strings.Contains(strings.ToLower(fp.Info.Desc), nameQuery) {
+			filteredFingerprints = append(filteredFingerprints, fp)
+			continue
+		}
+		if strings.Contains(strings.ToLower(fp.Info.Author), nameQuery) {
+			filteredFingerprints = append(filteredFingerprints, fp)
+			continue
+		}
 	}
 
 	// 5. 分页
@@ -276,14 +270,12 @@ func HandleEditFingerprint(c *gin.Context) {
 }
 
 // 漏洞库分页+条件查询接口
-func HandleListVulnerabilities(options *options.Options) gin.HandlerFunc {
+func HandleListVulnerabilities() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 1. 解析分页和查询参数
 		pageStr := c.DefaultQuery("page", "1")
-		sizeStr := c.DefaultQuery("size", "10")
-		cveQuery := strings.ToLower(c.DefaultQuery("cve", ""))
-		// severityQuery := strings.ToLower(c.DefaultQuery("severity", ""))
-		categoryQuery := c.DefaultQuery("category", "")
+		sizeStr := c.DefaultQuery("size", "20")
+		query := strings.ToLower(c.DefaultQuery("q", ""))
 		page, _ := strconv.Atoi(pageStr)
 		size, _ := strconv.Atoi(sizeStr)
 		if page < 1 {
@@ -293,39 +285,41 @@ func HandleListVulnerabilities(options *options.Options) gin.HandlerFunc {
 			size = 10
 		}
 
-		// 2. 创建 runner 实例
-		r, err := runner.New(options)
+		engine := vulstruct.NewAdvisoryEngine()
+		// load from directory
+		dir := "data/vuln"
+		err := engine.LoadFromDirectory(dir)
 		if err != nil {
-			gologger.Errorf("创建runner失败: %v", err)
-			c.JSON(500, gin.H{
-				"status":  1,
-				"message": err.Error(),
-				"data":    nil,
-			})
+			c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "加载漏洞库失败: " + err.Error()})
 			return
 		}
-		defer r.Close()
-
-		// 3. 获取所有指纹及其漏洞，拉平成一个大vul列表
-		allFpInfos := r.GetFpAndVulList()
-		allVuls := make([]vulstruct.VersionVul, 0)
-		for _, fp := range allFpInfos {
-			if categoryQuery != "" && fp.FpName != categoryQuery {
-				continue
-			}
-			allVuls = append(allVuls, fp.Vuls...)
-		}
-
-		// 4. 条件过滤
 		filteredVuls := make([]vulstruct.VersionVul, 0)
-		for _, vul := range allVuls {
-			if cveQuery != "" && !strings.Contains(strings.ToLower(vul.Info.CVEName), cveQuery) {
+		for _, vul := range engine.GetAll() {
+			if query == "" {
 				continue
 			}
-			if categoryQuery != "" && !strings.Contains(strings.ToLower(vul.Info.FingerPrintName), categoryQuery) {
+			if strings.Contains(vul.Info.CVEName, query) {
+				filteredVuls = append(filteredVuls, vul)
 				continue
 			}
-			filteredVuls = append(filteredVuls, vul)
+			if strings.Contains(vul.Info.Summary, query) {
+				filteredVuls = append(filteredVuls, vul)
+				continue
+			}
+			if strings.Contains(vul.Info.FingerPrintName, query) {
+				filteredVuls = append(filteredVuls, vul)
+				continue
+			}
+			if strings.Contains(vul.Info.Details, query) {
+				filteredVuls = append(filteredVuls, vul)
+				continue
+			}
+			for _, ref := range vul.References {
+				if strings.Contains(ref, query) {
+					filteredVuls = append(filteredVuls, vul)
+					break
+				}
+			}
 		}
 
 		// 5. 分页
@@ -378,7 +372,7 @@ func createTempFileWithContent(prefix string, content []byte) (string, func(), e
 }
 
 // 添加漏洞信息（带严格校验）
-func HandleCreateVulnerability(options *options.Options) gin.HandlerFunc {
+func HandleCreateVulnerability() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 1. 解析请求体，获取file_content
 		type VulnUploadRequest struct {
