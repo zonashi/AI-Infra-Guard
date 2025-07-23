@@ -298,24 +298,24 @@ func HandleListVulnerabilities() gin.HandlerFunc {
 			if query == "" {
 				continue
 			}
-			if strings.Contains(vul.Info.CVEName, query) {
+			if strings.Contains(strings.ToLower(vul.Info.CVEName), query) {
 				filteredVuls = append(filteredVuls, vul)
 				continue
 			}
-			if strings.Contains(vul.Info.Summary, query) {
+			if strings.Contains(strings.ToLower(vul.Info.Summary), query) {
 				filteredVuls = append(filteredVuls, vul)
 				continue
 			}
-			if strings.Contains(vul.Info.FingerPrintName, query) {
+			if strings.Contains(strings.ToLower(vul.Info.FingerPrintName), query) {
 				filteredVuls = append(filteredVuls, vul)
 				continue
 			}
-			if strings.Contains(vul.Info.Details, query) {
+			if strings.Contains(strings.ToLower(vul.Info.Details), query) {
 				filteredVuls = append(filteredVuls, vul)
 				continue
 			}
 			for _, ref := range vul.References {
-				if strings.Contains(ref, query) {
+				if strings.Contains(strings.ToLower(ref), query) {
 					filteredVuls = append(filteredVuls, vul)
 					break
 				}
