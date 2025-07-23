@@ -58,21 +58,22 @@ func HandleListFingerprints(c *gin.Context) {
 
 	// 4. 条件过滤
 	var filteredFingerprints []parser.FingerPrint
-	for _, fp := range allFingerprints {
-		if nameQuery == "" {
-			continue
-		}
-		if strings.Contains(strings.ToLower(fp.Info.Name), nameQuery) {
-			filteredFingerprints = append(filteredFingerprints, fp)
-			continue
-		}
-		if strings.Contains(strings.ToLower(fp.Info.Desc), nameQuery) {
-			filteredFingerprints = append(filteredFingerprints, fp)
-			continue
-		}
-		if strings.Contains(strings.ToLower(fp.Info.Author), nameQuery) {
-			filteredFingerprints = append(filteredFingerprints, fp)
-			continue
+	if nameQuery == "" {
+		filteredFingerprints = allFingerprints
+	} else {
+		for _, fp := range allFingerprints {
+			if strings.Contains(strings.ToLower(fp.Info.Name), nameQuery) {
+				filteredFingerprints = append(filteredFingerprints, fp)
+				continue
+			}
+			if strings.Contains(strings.ToLower(fp.Info.Desc), nameQuery) {
+				filteredFingerprints = append(filteredFingerprints, fp)
+				continue
+			}
+			if strings.Contains(strings.ToLower(fp.Info.Author), nameQuery) {
+				filteredFingerprints = append(filteredFingerprints, fp)
+				continue
+			}
 		}
 	}
 
@@ -294,34 +295,34 @@ func HandleListVulnerabilities() gin.HandlerFunc {
 			return
 		}
 		filteredVuls := make([]vulstruct.VersionVul, 0)
-		for _, vul := range engine.GetAll() {
-			if query == "" {
-				continue
-			}
-			if strings.Contains(strings.ToLower(vul.Info.CVEName), query) {
-				filteredVuls = append(filteredVuls, vul)
-				continue
-			}
-			if strings.Contains(strings.ToLower(vul.Info.Summary), query) {
-				filteredVuls = append(filteredVuls, vul)
-				continue
-			}
-			if strings.Contains(strings.ToLower(vul.Info.FingerPrintName), query) {
-				filteredVuls = append(filteredVuls, vul)
-				continue
-			}
-			if strings.Contains(strings.ToLower(vul.Info.Details), query) {
-				filteredVuls = append(filteredVuls, vul)
-				continue
-			}
-			for _, ref := range vul.References {
-				if strings.Contains(strings.ToLower(ref), query) {
+		if query == "" {
+			filteredVuls = engine.GetAll()
+		} else {
+			for _, vul := range engine.GetAll() {
+				if strings.Contains(strings.ToLower(vul.Info.CVEName), query) {
 					filteredVuls = append(filteredVuls, vul)
-					break
+					continue
+				}
+				if strings.Contains(strings.ToLower(vul.Info.Summary), query) {
+					filteredVuls = append(filteredVuls, vul)
+					continue
+				}
+				if strings.Contains(strings.ToLower(vul.Info.FingerPrintName), query) {
+					filteredVuls = append(filteredVuls, vul)
+					continue
+				}
+				if strings.Contains(strings.ToLower(vul.Info.Details), query) {
+					filteredVuls = append(filteredVuls, vul)
+					continue
+				}
+				for _, ref := range vul.References {
+					if strings.Contains(strings.ToLower(ref), query) {
+						filteredVuls = append(filteredVuls, vul)
+						break
+					}
 				}
 			}
 		}
-
 		// 5. 分页
 		total := len(filteredVuls)
 		start := (page - 1) * size
