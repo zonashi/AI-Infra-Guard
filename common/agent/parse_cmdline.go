@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"github.com/google/uuid"
+	"path"
 	"time"
 )
 
@@ -42,12 +43,14 @@ type CmdContent struct {
 var statusId string
 
 type PromptContent struct {
-	Total   int             `json:"total"`
-	Score   float32         `json:"score"`
-	Results []PromptResults `json:"results"`
+	Results    []PromptResults `json:"results"`
+	Total      int             `json:"total"`
+	Score      float32         `json:"score"`
+	Attachment string          `json:"attachment"`
 }
 type PromptResults struct {
 	Status        string `json:"status"`
+	ModelName     string `json:"modelName"`
 	Vulnerability string `json:"vulnerability"`
 	AttackMethod  string `json:"attackMethod"`
 	Input         string `json:"input"`
@@ -55,7 +58,7 @@ type PromptResults struct {
 	Reason        string `json:"reason"`
 }
 
-func ParseStdoutLine(tasks []SubTask, line string, callbacks TaskCallbacks) {
+func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callbacks TaskCallbacks) {
 	var cmd CmdContent
 	if err := json.Unmarshal([]byte(line), &cmd); err != nil {
 		fmt.Println(line)
@@ -112,24 +115,35 @@ func ParseStdoutLine(tasks []SubTask, line string, callbacks TaskCallbacks) {
 		}
 		callbacks.PlanUpdateCallback(tasks)
 		time.Sleep(1 * time.Second)
-		//content["msgType"] = "json"
-		//var ret PromptContent
-		//dd, err := json.Marshal(content["content"])
-		//if err != nil {
-		//	gologger.WithError(err).Errorln("Failed to parse result file json")
-		//	return
-		//}
-		//if err := json.Unmarshal(dd, &ret); err != nil {
-		//	gologger.WithError(err).Errorln("Failed to parse result file")
-		//	return
-		//}
-		//filename := content["content"].(string)
-		//data, err := os.ReadFile(filename)
-		//if err != nil {
-		//	gologger.WithError(err).Errorln("Failed to read result file", filename)
-		//	return
-		//}
-		//content["content"] = string(data)
 		callbacks.ResultCallback(content)
+		var ret PromptContent
+		dd, err := json.Marshal(content["content"])
+		if err != nil {
+			gologger.WithError(err).Errorln("Failed to parse result file json")
+			return
+		}
+		if err := json.Unmarshal(dd, &ret); err != nil {
+			gologger.WithError(err).Errorln("Failed to parse result file")
+			return
+		}
+		gologger.Infoln("开始上传文件")
+		info, err := UploadFile(server, path.Join(rootDir, ret.Attachment))
+		if err != nil {
+			gologger.WithError(err).Errorln("Failed to upload file")
+			return
+		}
+		gologger.Infoln("上传文件成功")
+		ret.Attachment = info.Data.FileUrl
+		dd, err = json.Marshal(ret)
+		if err != nil {
+			gologger.WithError(err).Errorln("Failed to parse result file json")
+			return
+		}
+		var content2 map[string]interface{}
+		if err := json.Unmarshal(dd, &content2); err != nil {
+			gologger.WithError(err).Errorln("Failed to parse result file json")
+			return
+		}
+		callbacks.ResultCallback(content2)
 	}
 }

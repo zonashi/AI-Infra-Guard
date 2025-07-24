@@ -627,6 +627,7 @@ func HandleListEvaluations(c *gin.Context) {
 	// 1. 解析分页参数
 	pageStr := c.DefaultQuery("page", "1")
 	sizeStr := c.DefaultQuery("size", "20")
+	detail := c.DefaultQuery("detail", "false")
 	page, _ := strconv.Atoi(pageStr)
 	size, _ := strconv.Atoi(sizeStr)
 	if page < 1 {
@@ -640,7 +641,7 @@ func HandleListEvaluations(c *gin.Context) {
 	nameQuery := strings.ToLower(c.DefaultQuery("q", ""))
 
 	// 3. 读取 data/eval/ 下所有JSON文件
-	var allEvaluations []EvaluationDatasetSummary
+	var allEvaluations []EvaluationDataset
 	root := "data/eval"
 	filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -652,13 +653,16 @@ func HandleListEvaluations(c *gin.Context) {
 				var eval EvaluationDataset
 				if parseErr := json.Unmarshal(content, &eval); parseErr == nil {
 					// 转换为摘要格式（不包含data字段）
-					summary := EvaluationDatasetSummary{
+					summary := EvaluationDataset{
 						Name:           eval.Name,
 						Description:    eval.Description,
 						Count:          eval.Count,
 						Tags:           eval.Tags,
 						Recommendation: eval.Recommendation,
 						Language:       eval.Language,
+					}
+					if detail == "true" {
+						summary.Data = eval.Data
 					}
 					allEvaluations = append(allEvaluations, summary)
 				}
@@ -668,7 +672,7 @@ func HandleListEvaluations(c *gin.Context) {
 	})
 
 	// 4. 条件过滤
-	var filteredEvaluations []EvaluationDatasetSummary
+	var filteredEvaluations []EvaluationDataset
 	if nameQuery == "" {
 		filteredEvaluations = allEvaluations
 	} else {

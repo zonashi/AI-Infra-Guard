@@ -40,7 +40,7 @@ func main() {
 		Server: server,
 	}
 	agent3 := agent.McpScanAgent{Server: server}
-	agent4 := agent.ModelJailbreak{}
+	agent4 := agent.ModelJailbreak{Server: server}
 	agent5 := agent.ModelRedteamReport{Server: server}
 
 	x.RegisterTaskFunc(&agent2)
