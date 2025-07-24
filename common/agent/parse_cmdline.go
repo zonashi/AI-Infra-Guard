@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"github.com/google/uuid"
+	"time"
 )
 
 type CmdNewPlanStep struct {
@@ -110,7 +111,7 @@ func ParseStdoutLine(tasks []SubTask, line string, callbacks TaskCallbacks) {
 			tasks[i].Status = SubTaskStatusDone
 		}
 		callbacks.PlanUpdateCallback(tasks)
-
+		time.Sleep(1 * time.Second)
 		//content["msgType"] = "json"
 		//var ret PromptContent
 		//dd, err := json.Marshal(content["content"])

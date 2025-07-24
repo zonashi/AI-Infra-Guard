@@ -10,9 +10,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"github.com/Tencent/AI-Infra-Guard/internal/mcp"
-	"github.com/Tencent/AI-Infra-Guard/internal/mcp/models"
 	"github.com/gorilla/websocket"
 )
 

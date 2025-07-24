@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/Tencent/AI-Infra-Guard/pkg/openai"
 	"io"
 	"math"
 	"net/http"
@@ -619,26 +618,6 @@ func (r *Runner) writeResult(f *os.File, result HttpResult) {
 			}
 			fmt.Println(builder.String())
 			_, _ = f.WriteString(builderFile.String() + "\n")
-		}
-		if r.Options.AIAnalysis {
-			fmt.Println("AI分析:")
-			prompt := "你是安全漏洞报告解读大师，我会给你扫描器输出的url和存在的cve详情。以编写甲方漏洞报告的形式编写完整报告，参考格式如：\n# 一、风险总览\n(描述测试的url以及基本信息，综合CVE漏洞可能造成的严重漏洞后果)\n# 二、漏洞详情\n(请你利用搜索等功能，依次分析CVE的详情，给出漏洞怎么产生，怎么利用，修复方案的详情(根据漏洞类型给出对应修复方案，执行的命令,而不是简单升级)，然后给出可靠参考来源,相同类型漏洞合并在一起给出)\n漏洞报告如下：\n"
-			prompt += fmt.Sprintf("%s title:%s fingerprint:%v", result.URL, result.Title, result.Fingers) + "\n"
-			for _, item := range result.Advisories {
-				prompt += fmt.Sprintf("%s[%s]:%s\n", item.Info.CVEName, item.Info.Severity, item.Info.Details)
-				prompt += fmt.Sprintf("reference: %v\n", item.References)
-			}
-			var err error
-			var full string
-			if r.Options.AIDeepSeekToken != "" {
-				full, err = openai.DeepSeekR1API(prompt, r.Options.AIDeepSeekToken)
-			} else {
-				full, err = openai.HunyuanAI(prompt, r.Options.AIHunyuanToken)
-			}
-			if err != nil {
-				gologger.WithError(err).Errorln("AI分析失败")
-			}
-			_, _ = f.WriteString(full + "\n")
 		}
 	}
 }

@@ -270,7 +270,12 @@ func (a *Agent) processMessage(data []byte) error {
 						gologger.Debugln("PlanUpdateCallback", tasks)
 					},
 				}
-				go taskFunc.Execute(taskCtx, task, callbacks)
+				go func() {
+					err := taskFunc.Execute(taskCtx, task, callbacks)
+					if err != nil {
+						a.SendError(task.SessionId, err.Error())
+					}
+				}()
 				break
 			}
 		}
@@ -522,4 +527,38 @@ func CreateSubTask(status statusString, title string, startedAt int64, stepId st
 		StartedAt: startedAt,
 		StepId:    stepId,
 	}
+}
+
+// SendError 发送错误
+func (a *Agent) SendError(sessionId, msg string) error {
+	timestamp := time.Now().Unix()
+	msgId := uuid.New().String()
+
+	// 构建更新任务计划事件数据
+	event := ErrorEvent{
+		Id:        msgId,
+		Type:      "error",
+		Timestamp: timestamp,
+		Message:   msg,
+	}
+
+	// 构建更新任务计划更新消息
+	planUpdateUpdate := ErrorUpdate{
+		ID:        msgId,
+		Type:      "event",
+		SessionID: sessionId,
+		Timestamp: timestamp,
+		Event:     event,
+	}
+
+	// 构建发送给服务器的消息
+	planUpdateContent := ErrorUpdateContent{
+		Type:    AgentMsgTypeError,
+		Content: planUpdateUpdate,
+	}
+
+	// 通过发送通道发送消息
+	a.sendChan <- planUpdateContent
+	return nil
+
 }

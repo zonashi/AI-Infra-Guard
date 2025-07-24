@@ -13,8 +13,8 @@ import (
 
 	"github.com/Tencent/AI-Infra-Guard/common/utils"
 
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"github.com/Tencent/AI-Infra-Guard/internal/mcp"
-	"github.com/Tencent/AI-Infra-Guard/internal/mcp/models"
 
 	"github.com/Tencent/AI-Infra-Guard/common/runner"
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
@@ -408,6 +408,9 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	if transport == "url" {
 		scanType = "URL扫描"
 		url := params.Content
+		if url == "" {
+			return fmt.Errorf("url is empty")
+		}
 		callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "A.I.G开始扫描", fmt.Sprintf("开始扫描URL: %s", url))
 		r, err := scanner.InputUrl(ctx, url)
 		if err != nil || r == nil {

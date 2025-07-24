@@ -1,8 +1,10 @@
 package websocket
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -206,6 +208,13 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 					}
 					log.Errorf("获取模型信息失败: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelIDStr, err)
 					return fmt.Errorf("获取模型信息失败: %v", err)
+				}
+				// 测试模型是否有效
+				ai := models.NewOpenAI(model.Token, model.ModelName, model.BaseURL)
+				err = ai.Vaild(context.Background())
+				if err != nil {
+					log.Errorf("模型无效: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelIDStr, err)
+					return fmt.Errorf("模型无效: %v", err)
 				}
 
 				// 构造模型信息
@@ -902,10 +911,10 @@ func (tm *TaskManager) GetTaskDetail(sessionId string, username string, traceID 
 	}
 
 	// 验证用户权限（只有任务创建者才能查看）
-	if session.Username != username {
-		log.Errorf("无权限访问任务详情: trace_id=%s, sessionId=%s, username=%s, owner=%s", traceID, sessionId, username, session.Username)
-		return nil, fmt.Errorf("无权限查看此任务")
-	}
+	//if session.Username != username {
+	//	log.Errorf("无权限访问任务详情: trace_id=%s, sessionId=%s, username=%s, owner=%s", traceID, sessionId, username, session.Username)
+	//	return nil, fmt.Errorf("无权限查看此任务")
+	//}
 
 	// 获取任务的所有消息
 	messages, err := tm.taskStore.GetSessionMessages(sessionId)

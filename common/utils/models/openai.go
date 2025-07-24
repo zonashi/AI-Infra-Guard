@@ -2,10 +2,13 @@ package models
 
 import (
 	"context"
+	"errors"
+	"strings"
+
+	"github.com/openai/openai-go/option"
+
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
-	"strings"
 )
 
 type AIModel interface {
@@ -31,6 +34,29 @@ func NewOpenAI(key string, model string, url string) *OpenAI {
 		BaseUrl: url,
 		Model:   model,
 	}
+}
+
+// 验证OpenAI是否可用
+func (ai *OpenAI) Vaild(ctx context.Context) error {
+	client := openai.NewClient(option.WithBaseURL(ai.BaseUrl), option.WithAPIKey(ai.Key))
+	res, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("only return '1'"),
+		},
+		Model:               ai.Model,
+		Seed:                openai.Int(24),
+		MaxCompletionTokens: openai.Int(1),
+	})
+	if err != nil {
+		return err
+	}
+	if len(res.Choices) == 0 {
+		return errors.New("no response")
+	}
+	if len(res.Choices[0].Message.Content) == 0 {
+		return errors.New("invalid response")
+	}
+	return nil
 }
 func (ai *OpenAI) ChatStream(ctx context.Context, history []map[string]string) <-chan string {
 	client := openai.NewClient(option.WithBaseURL(ai.BaseUrl), option.WithAPIKey(ai.Key))

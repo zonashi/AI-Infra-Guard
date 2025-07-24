@@ -3,15 +3,14 @@ package mcp
 import (
 	"context"
 	"fmt"
-	"os"
-	"regexp"
-	"strings"
-
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
-	"github.com/Tencent/AI-Infra-Guard/internal/mcp/models"
 	"github.com/Tencent/AI-Infra-Guard/internal/mcp/utils"
 	"github.com/mark3labs/mcp-go/client"
 	"gopkg.in/yaml.v3"
+	"os"
+	"regexp"
+	"strings"
 )
 
 type PluginConfig struct {
