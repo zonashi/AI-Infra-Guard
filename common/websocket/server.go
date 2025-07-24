@@ -99,11 +99,21 @@ func RunWebServer(options *options.Options) {
 				vulnerabilities.PUT("/:cve", HandleEditVulnerability)
 				vulnerabilities.DELETE("", HandleBatchDeleteVulnerabilities)
 			}
+
+			// 评测集
+			evaluations := knowledge.Group("/evaluations")
+			{
+				// 管理功能
+				evaluations.GET("", HandleListEvaluations)
+				evaluations.GET("/:name", HandleGetEvaluationDetail)
+				evaluations.POST("", HandleCreateEvaluation)
+				evaluations.PUT("/:name", HandleEditEvaluation)
+				evaluations.DELETE("", HandleDeleteEvaluation)
+			}
 		}
 		appSecurity := v1.Group("/app")
 		{
 			appSecurity.Use(setupIdentityMiddleware())
-
 			// 任务管理
 			tasks := appSecurity.Group("/tasks")
 			{
@@ -148,7 +158,6 @@ func RunWebServer(options *options.Options) {
 					HandleTerminateTask(c, taskManager)
 				})
 			}
-
 			// 模型管理
 			models := appSecurity.Group("/models")
 			{
@@ -174,7 +183,6 @@ func RunWebServer(options *options.Options) {
 				})
 			}
 		}
-
 		// 4. Agent 管理
 		agents := v1.Group("/agents")
 		{

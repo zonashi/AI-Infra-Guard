@@ -444,27 +444,52 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 	// 从中间件获取用户名
 	username := c.GetString("username")
 
-	log.Infof("开始获取任务列表: trace_id=%s, username=%s", traceID, username)
+	query := c.Query("q")
+	var err error
 
-	// 获取用户的任务列表
-	tasks, err := tm.GetUserTasks(username, traceID)
-	if err != nil {
-		log.Errorf("获取任务列表失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
-		c.JSON(http.StatusOK, gin.H{
-			"status":  1,
-			"message": "获取任务列表失败: " + err.Error(),
-			"data":    nil,
-		})
-		return
+	log.Infof("开始获取任务列表: trace_id=%s, username=%s", traceID, username)
+	var results []map[string]interface{}
+	if query != "" {
+		log.Infof("搜索参数: trace_id=%s, username=%s, query=%s", traceID, username)
+		var searchParams database.SimpleSearchParams
+
+		// 从查询字符串获取搜索关键词
+		searchParams.Query = query
+		searchParams.Page = 1
+		searchParams.PageSize = 999
+		// 调用TaskManager进行简化搜索
+		results, err = tm.SearchUserTasksSimple(username, searchParams, traceID)
+		if err != nil {
+			log.Errorf("搜索任务失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
+			c.JSON(http.StatusOK, gin.H{
+				"status":  1,
+				"message": "搜索任务失败: " + err.Error(),
+				"data":    nil,
+			})
+			return
+		}
+
+	} else {
+		// 获取用户的任务列表
+		results, err = tm.GetUserTasks(username, traceID)
+		if err != nil {
+			log.Errorf("获取任务列表失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
+			c.JSON(http.StatusOK, gin.H{
+				"status":  1,
+				"message": "获取任务列表失败: " + err.Error(),
+				"data":    nil,
+			})
+			return
+		}
 	}
 
-	log.Infof("获取任务列表成功: trace_id=%s, username=%s, taskCount=%d", traceID, username, len(tasks))
+	log.Infof("获取任务列表成功: trace_id=%s, username=%s, taskCount=%d", traceID, username, len(results))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
 		"message": "获取任务列表成功",
 		"data": gin.H{
-			"tasks": tasks,
+			"tasks": results,
 		},
 	})
 }

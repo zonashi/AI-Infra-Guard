@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -20,6 +21,32 @@ var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
 func isValidName(name string) bool {
 	return validName.MatchString(name)
+}
+
+// 评测集数据结构定义
+type EvaluationDataItem struct {
+	Source string `json:"source,omitempty"`
+	Prompt string `json:"prompt"`
+}
+
+type EvaluationDataset struct {
+	Name           string               `json:"name"`
+	Description    string               `json:"description"`
+	Count          int                  `json:"count"`
+	Tags           []string             `json:"tags,omitempty"`
+	Recommendation int                  `json:"recommendation,omitempty"`
+	Language       string               `json:"language,omitempty"`
+	Data           []EvaluationDataItem `json:"data"`
+}
+
+// 评测集摘要结构体（不包含data字段，用于列表接口）
+type EvaluationDatasetSummary struct {
+	Name           string   `json:"name"`
+	Description    string   `json:"description"`
+	Count          int      `json:"count"`
+	Tags           []string `json:"tags,omitempty"`
+	Recommendation int      `json:"recommendation,omitempty"`
+	Language       string   `json:"language,omitempty"`
 }
 
 // 获取指纹列表，支持分页和名字模糊
@@ -591,4 +618,346 @@ func HandleBatchDeleteVulnerabilities(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": 0, "message": "批量删除成功"})
+}
+
+// ================== 评测集管理接口 ==================
+
+// 获取评测集列表，支持分页和名字模糊搜索
+func HandleListEvaluations(c *gin.Context) {
+	// 1. 解析分页参数
+	pageStr := c.DefaultQuery("page", "1")
+	sizeStr := c.DefaultQuery("size", "20")
+	page, _ := strconv.Atoi(pageStr)
+	size, _ := strconv.Atoi(sizeStr)
+	if page < 1 {
+		page = 1
+	}
+	if size < 1 {
+		size = 10
+	}
+
+	// 2. 获取查询参数
+	nameQuery := strings.ToLower(c.DefaultQuery("q", ""))
+
+	// 3. 读取 data/eval/ 下所有JSON文件
+	var allEvaluations []EvaluationDatasetSummary
+	root := "data/eval"
+	filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return nil // 忽略错误
+		}
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".json") {
+			content, readErr := os.ReadFile(path)
+			if readErr == nil {
+				var eval EvaluationDataset
+				if parseErr := json.Unmarshal(content, &eval); parseErr == nil {
+					// 转换为摘要格式（不包含data字段）
+					summary := EvaluationDatasetSummary{
+						Name:           eval.Name,
+						Description:    eval.Description,
+						Count:          eval.Count,
+						Tags:           eval.Tags,
+						Recommendation: eval.Recommendation,
+						Language:       eval.Language,
+					}
+					allEvaluations = append(allEvaluations, summary)
+				}
+			}
+		}
+		return nil
+	})
+
+	// 4. 条件过滤
+	var filteredEvaluations []EvaluationDatasetSummary
+	if nameQuery == "" {
+		filteredEvaluations = allEvaluations
+	} else {
+		for _, eval := range allEvaluations {
+			if strings.Contains(strings.ToLower(eval.Name), nameQuery) {
+				filteredEvaluations = append(filteredEvaluations, eval)
+				continue
+			}
+			if strings.Contains(strings.ToLower(eval.Description), nameQuery) {
+				filteredEvaluations = append(filteredEvaluations, eval)
+				continue
+			}
+			// 搜索标签
+			for _, tag := range eval.Tags {
+				if strings.Contains(strings.ToLower(tag), nameQuery) {
+					filteredEvaluations = append(filteredEvaluations, eval)
+					break
+				}
+			}
+		}
+	}
+
+	// 5. 分页
+	total := len(filteredEvaluations)
+	start := (page - 1) * size
+	end := start + size
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+	items := filteredEvaluations[start:end]
+
+	// 6. 返回
+	c.JSON(http.StatusOK, gin.H{
+		"status":  0,
+		"message": "success",
+		"data": gin.H{
+			"total": total,
+			"page":  page,
+			"size":  size,
+			"items": items,
+		},
+	})
+}
+
+// 获取评测集详情，返回包含data的完整信息
+func HandleGetEvaluationDetail(c *gin.Context) {
+	// 1. 获取评测集名称
+	name := c.Param("name")
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称不能为空"})
+		return
+	}
+
+	// 2. 验证名称合法性
+	if !isValidName(name) {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称非法"})
+		return
+	}
+
+	// 3. 读取评测集文件
+	jsonPath := filepath.Join("data/eval", name+".json")
+	if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"status": 1, "message": "评测集不存在"})
+		return
+	}
+
+	content, err := os.ReadFile(jsonPath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "读取文件失败: " + err.Error()})
+		return
+	}
+
+	// 4. 解析JSON内容
+	var eval EvaluationDataset
+	if err := json.Unmarshal(content, &eval); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "解析文件失败: " + err.Error()})
+		return
+	}
+
+	// 5. 返回完整的评测集信息（包含data字段）
+	c.JSON(http.StatusOK, gin.H{
+		"status":  0,
+		"message": "success",
+		"data":    eval,
+	})
+}
+
+// 创建评测集
+func HandleCreateEvaluation(c *gin.Context) {
+	// 1. 解析请求体，获取file_content字段
+	type EvaluationUploadRequest struct {
+		FileContent string `json:"file_content" binding:"required"`
+	}
+	var req EvaluationUploadRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "参数解析失败"})
+		return
+	}
+
+	// 2. 解析JSON为EvaluationDataset结构体
+	var eval EvaluationDataset
+	if err := json.Unmarshal([]byte(req.FileContent), &eval); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "JSON解析失败: " + err.Error()})
+		return
+	}
+	if eval.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称不能为空"})
+		return
+	}
+
+	// 3. 验证数据完整性
+	if len(eval.Data) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测数据不能为空"})
+		return
+	}
+
+	// 更新count字段为实际数据条数
+	eval.Count = len(eval.Data)
+
+	// 验证数据项
+	for i, item := range eval.Data {
+		if item.Prompt == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": fmt.Sprintf("第%d条数据的prompt不能为空", i+1)})
+			return
+		}
+	}
+
+	// 4. 检查评测集名称是否已存在
+	if !isValidName(eval.Name) {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称非法，只允许字母、数字、下划线和横线"})
+		return
+	}
+	jsonPath := filepath.Join("data/eval", eval.Name+".json")
+	if _, err := os.Stat(jsonPath); err == nil {
+		c.JSON(http.StatusConflict, gin.H{"status": 1, "message": "评测集已存在"})
+		return
+	}
+
+	// 5. 序列化并写入JSON文件
+	updatedContent, err := json.MarshalIndent(eval, "", "  ")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "JSON序列化失败: " + err.Error()})
+		return
+	}
+
+	if err := os.WriteFile(jsonPath, updatedContent, 0644); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "文件写入失败: " + err.Error()})
+		return
+	}
+
+	// 6. 返回精简响应
+	c.JSON(http.StatusOK, gin.H{"status": 0, "message": "创建评测集成功"})
+}
+
+// 编辑评测集处理函数
+func HandleEditEvaluation(c *gin.Context) {
+	// 1. 获取原评测集名称
+	oldName := c.Param("name")
+	if oldName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称不能为空"})
+		return
+	}
+
+	type EvaluationUploadRequest struct {
+		FileContent string `json:"file_content" binding:"required"`
+	}
+	var req EvaluationUploadRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "参数解析失败"})
+		return
+	}
+
+	// 2. 解析JSON为EvaluationDataset结构体
+	var eval EvaluationDataset
+	if err := json.Unmarshal([]byte(req.FileContent), &eval); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "JSON解析失败: " + err.Error()})
+		return
+	}
+	if eval.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称不能为空"})
+		return
+	}
+
+	// 验证数据完整性
+	if len(eval.Data) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测数据不能为空"})
+		return
+	}
+
+	// 更新count字段为实际数据条数
+	eval.Count = len(eval.Data)
+
+	// 验证数据项
+	for i, item := range eval.Data {
+		if item.Prompt == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": fmt.Sprintf("第%d条数据的prompt不能为空", i+1)})
+			return
+		}
+	}
+
+	// 3. 校验原文件是否存在
+	if !isValidName(oldName) || !isValidName(eval.Name) {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称非法，只允许字母、数字、下划线和横线"})
+		return
+	}
+	oldPath := filepath.Join("data/eval", oldName+".json")
+	if _, err := os.Stat(oldPath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"status": 1, "message": "原评测集不存在"})
+		return
+	}
+	newPath := filepath.Join("data/eval", eval.Name+".json")
+
+	// 4. 校验新文件名是否已存在（且不是原文件）
+	if newPath != oldPath {
+		if _, err := os.Stat(newPath); err == nil {
+			c.JSON(http.StatusConflict, gin.H{"status": 1, "message": "新评测集名称已存在"})
+			return
+		}
+	}
+
+	// 5. 如果新旧文件名不同，删除原文件
+	if oldName != eval.Name {
+		_ = os.Remove(oldPath) // 删除老文件
+	}
+
+	// 6. 序列化并写入新内容（新文件名）
+	updatedContent, err := json.MarshalIndent(eval, "", "  ")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "JSON序列化失败: " + err.Error()})
+		return
+	}
+
+	if err := os.WriteFile(newPath, updatedContent, 0644); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "文件写入失败: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": 0, "message": "修改评测集成功"})
+}
+
+// 批量删除评测集处理函数
+type BatchDeleteEvaluationRequest struct {
+	Names []string `json:"names"`
+}
+
+func HandleDeleteEvaluation(c *gin.Context) {
+	var req BatchDeleteEvaluationRequest
+	if err := c.ShouldBindJSON(&req); err != nil || len(req.Names) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "参数错误", "data": nil})
+		return
+	}
+
+	var deleted []string
+	var notFound []string
+	var invalid []string
+
+	for _, name := range req.Names {
+		// 使用已存在的合法性校验函数防止路径遍历攻击
+		if !isValidName(name) {
+			invalid = append(invalid, name)
+			continue
+		}
+		jsonPath := filepath.Join("data/eval", name+".json")
+		if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
+			notFound = append(notFound, name)
+			continue
+		}
+		if err := os.Remove(jsonPath); err == nil {
+			deleted = append(deleted, name)
+		}
+	}
+
+	msg := "删除完成"
+	if len(notFound) > 0 {
+		msg += "，部分评测集未找到: " + strings.Join(notFound, ", ")
+	}
+	if len(invalid) > 0 {
+		msg += "，部分评测集名称非法: " + strings.Join(invalid, ", ")
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  0,
+		"message": msg,
+		"data": gin.H{
+			"deleted":  deleted,
+			"notFound": notFound,
+		},
+	})
 }

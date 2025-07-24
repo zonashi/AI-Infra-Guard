@@ -281,3 +281,9 @@ type PlanUpdateContent struct {
 	Type    string           `json:"type"`    // 固定为"planUpdate"
 	Content PlanUpdateUpdate `json:"content"` // 更新任务计划数据
 }
+
+// ErrorUpdateContent Agent发送给服务器的错误更新内容
+type ErrorUpdateContent struct {
+	Type    string `json:"type"`    // 固定为"errorUpdate"
+	Content string `json:"content"` // 错误信息
+}

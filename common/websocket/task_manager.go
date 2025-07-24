@@ -29,9 +29,10 @@ const (
 	WSMsgTypeTaskAssign = "task_assign" // 任务分配
 
 	// 任务状态常量
-	TaskStatusTodo       = "todo"       // 待执行
-	TaskStatusDoing      = "doing"      // 执行中
-	TaskStatusDone       = "done"       // 已完成
+	TaskStatusTodo       = "todo"  // 待执行
+	TaskStatusDoing      = "doing" // 执行中
+	TaskStatusDone       = "done"  // 已完成
+	TaskStatusError      = "error"
 	TaskStatusTerminated = "terminated" // 已终止
 )
 
@@ -749,7 +750,7 @@ func (tm *TaskManager) GetUserTasks(username string, traceID string) ([]map[stri
 }
 
 // SearchUserTasksSimple 使用简化参数搜索指定用户的任务，支持单个查询关键词和分页
-func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams database.SimpleSearchParams, traceID string) (map[string]interface{}, error) {
+func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams database.SimpleSearchParams, traceID string) ([]map[string]interface{}, error) {
 	log.Infof("开始简化搜索用户任务: trace_id=%s, username=%s, query=%s", traceID, username, searchParams.Query)
 
 	// 验证和设置默认分页参数
@@ -764,7 +765,7 @@ func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams datab
 	}
 
 	// 从数据库搜索用户的任务列表
-	sessions, total, err := tm.taskStore.SearchUserSessionsSimple(username, searchParams)
+	sessions, _, err := tm.taskStore.SearchUserSessionsSimple(username, searchParams)
 	if err != nil {
 		log.Errorf("简化搜索用户任务失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
 		return nil, fmt.Errorf("搜索任务失败: %v", err)
@@ -792,22 +793,7 @@ func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams datab
 
 		tasks = append(tasks, task)
 	}
-
-	// 计算分页信息
-	totalPages := (int(total) + searchParams.PageSize - 1) / searchParams.PageSize
-
-	result := map[string]interface{}{
-		"tasks": tasks,
-		"pagination": map[string]interface{}{
-			"page":       searchParams.Page,
-			"pageSize":   searchParams.PageSize,
-			"total":      total,
-			"totalPages": totalPages,
-		},
-	}
-
-	log.Infof("搜索用户任务成功: trace_id=%s, username=%s, query=%s, total=%d, pageCount=%d", traceID, username, searchParams.Query, total, len(tasks))
-	return result, nil
+	return tasks, nil
 }
 
 // generateTaskTitle 生成任务标题（用于任务创建API）
