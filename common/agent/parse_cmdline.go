@@ -3,10 +3,8 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"os"
-
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
+	"github.com/google/uuid"
 )
 
 type CmdNewPlanStep struct {
@@ -41,6 +39,20 @@ type CmdContent struct {
 }
 
 var statusId string
+
+type PromptContent struct {
+	Total   int             `json:"total"`
+	Score   float32         `json:"score"`
+	Results []PromptResults `json:"results"`
+}
+type PromptResults struct {
+	Status        string `json:"status"`
+	Vulnerability string `json:"vulnerability"`
+	AttackMethod  string `json:"attackMethod"`
+	Input         string `json:"input"`
+	Output        string `json:"output"`
+	Reason        string `json:"reason"`
+}
 
 func ParseStdoutLine(tasks []SubTask, line string, callbacks TaskCallbacks) {
 	var cmd CmdContent
@@ -99,14 +111,24 @@ func ParseStdoutLine(tasks []SubTask, line string, callbacks TaskCallbacks) {
 		}
 		callbacks.PlanUpdateCallback(tasks)
 
-		content["msgType"] = "markdown"
-		filename := content["content"].(string)
-		data, err := os.ReadFile(filename)
-		if err != nil {
-			gologger.WithError(err).Errorln("Failed to read result file", filename)
-			return
-		}
-		content["content"] = string(data)
+		//content["msgType"] = "json"
+		//var ret PromptContent
+		//dd, err := json.Marshal(content["content"])
+		//if err != nil {
+		//	gologger.WithError(err).Errorln("Failed to parse result file json")
+		//	return
+		//}
+		//if err := json.Unmarshal(dd, &ret); err != nil {
+		//	gologger.WithError(err).Errorln("Failed to parse result file")
+		//	return
+		//}
+		//filename := content["content"].(string)
+		//data, err := os.ReadFile(filename)
+		//if err != nil {
+		//	gologger.WithError(err).Errorln("Failed to read result file", filename)
+		//	return
+		//}
+		//content["content"] = string(data)
 		callbacks.ResultCallback(content)
 	}
 }
