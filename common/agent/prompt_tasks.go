@@ -89,12 +89,14 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		"--choice", "serial",
 		"--report", tmpFile,
 	}, func(line string) {
-		ParseStdoutLine(tasks, line, callbacks)
+		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
 	})
 	return err
 }
 
-type ModelJailbreak struct{}
+type ModelJailbreak struct {
+	Server string
+}
 
 func (m *ModelJailbreak) GetName() string {
 	return TaskTypeModelJailbreak
@@ -141,7 +143,7 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 		"--choice", "parallel",
 		"--report", tmpFile,
 	}, func(line string) {
-		ParseStdoutLine(tasks, line, callbacks)
+		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
 	})
 	return err
 }
