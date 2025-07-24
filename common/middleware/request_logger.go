@@ -86,7 +86,7 @@ func RequestLoggerMiddleware() gin.HandlerFunc {
 		// 序列化请求信息
 		requestJSON, _ := json.Marshal(requestInfo)
 
-		log.Infof("请求接收: trace_id=%s, request_info=%s", traceID, string(requestJSON))
+		log.Debugf("请求接收: trace_id=%s, request_info=%s", traceID, string(requestJSON))
 
 		// 继续处理请求
 		c.Next()
@@ -95,7 +95,7 @@ func RequestLoggerMiddleware() gin.HandlerFunc {
 		duration := time.Since(start)
 		status := c.Writer.Status()
 
-		log.Infof("请求完成: trace_id=%s, status=%d, duration=%v", traceID, status, duration)
+		log.Debugf("请求完成: trace_id=%s, status=%d, duration=%v", traceID, status, duration)
 	}
 }
 

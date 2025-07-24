@@ -17,7 +17,7 @@ import (
 )
 
 // 合法性校验
-var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+var validName = regexp.MustCompile(`^[a-zA-Z0-9 _-]+$`)
 
 func isValidName(name string) bool {
 	return validName.MatchString(name)
@@ -732,30 +732,40 @@ func HandleGetEvaluationDetail(c *gin.Context) {
 	}
 
 	// 3. 读取评测集文件
-	jsonPath := filepath.Join("data/eval", name+".json")
-	if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
-		c.JSON(http.StatusNotFound, gin.H{"status": 1, "message": "评测集不存在"})
-		return
-	}
+	var allEvaluations []EvaluationDataset
+	root := "data/eval"
+	filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return nil // 忽略错误
+		}
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".json") {
+			content, readErr := os.ReadFile(path)
+			if readErr == nil {
+				var eval EvaluationDataset
+				if parseErr := json.Unmarshal(content, &eval); parseErr == nil {
+					allEvaluations = append(allEvaluations, eval)
+				}
+			}
+		}
+		return nil
+	})
 
-	content, err := os.ReadFile(jsonPath)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "读取文件失败: " + err.Error()})
-		return
-	}
-
-	// 4. 解析JSON内容
-	var eval EvaluationDataset
-	if err := json.Unmarshal(content, &eval); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "解析文件失败: " + err.Error()})
-		return
+	for _, eval := range allEvaluations {
+		if eval.Name == name {
+			c.JSON(http.StatusOK, gin.H{
+				"status":  0,
+				"message": "success",
+				"data":    eval,
+			})
+			return
+		}
 	}
 
 	// 5. 返回完整的评测集信息（包含data字段）
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
 		"message": "success",
-		"data":    eval,
+		"data":    nil,
 	})
 }
 

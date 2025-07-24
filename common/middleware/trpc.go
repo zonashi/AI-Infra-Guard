@@ -21,7 +21,7 @@ func TrpcMiddleware() gin.HandlerFunc {
 		startTime := time.Now()
 
 		// 记录请求开始日志
-		log.Infof("请求开始: trace_id=%s, method=%s, path=%s, client_ip=%s",
+		log.Debugf("请求开始: trace_id=%s, method=%s, path=%s, client_ip=%s",
 			traceID, c.Request.Method, c.FullPath(), getClientIP(c))
 
 		// 继续处理请求
@@ -31,14 +31,9 @@ func TrpcMiddleware() gin.HandlerFunc {
 		duration := time.Since(startTime)
 
 		// 记录请求结束日志
-		log.Infof("请求结束: trace_id=%s, method=%s, path=%s, status=%d, duration=%v",
+		log.Debugf("请求结束: trace_id=%s, method=%s, path=%s, status=%d, duration=%v",
 			traceID, c.Request.Method, c.FullPath(), c.Writer.Status(), duration)
 
-		// 获取客户端IP
-		clientIP := getClientIP(c)
-
-		// 监控相关代码已移除
-		_ = clientIP // 避免未使用变量警告
 	}
 }
 
