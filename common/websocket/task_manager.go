@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -16,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 
 	"github.com/Tencent/AI-Infra-Guard/common/agent"
 
@@ -754,9 +755,43 @@ func (tm *TaskManager) GetUserTasks(username string, traceID string) ([]map[stri
 	return tasks, nil
 }
 
+// GetUserTasksByType 获取指定用户的任务列表，支持可选的任务类型过滤
+func (tm *TaskManager) GetUserTasksByType(username string, taskType string, traceID string) ([]map[string]interface{}, error) {
+	// 从数据库获取用户的任务列表（支持类型过滤）
+	sessions, err := tm.taskStore.GetUserSessionsByType(username, taskType)
+	if err != nil {
+		log.Errorf("获取用户任务列表失败: trace_id=%s, username=%s, taskType=%s, error=%v", traceID, username, taskType, err)
+		return nil, fmt.Errorf("获取任务列表失败: %v", err)
+	}
+
+	// 转换为前端需要的格式
+	var tasks []map[string]interface{}
+	for _, session := range sessions {
+		task := map[string]interface{}{
+			"sessionId":      session.ID,
+			"title":          session.Title,
+			"taskType":       session.TaskType,
+			"status":         session.Status,
+			"countryIsoCode": session.CountryIsoCode,
+			"updatedAt":      session.UpdatedAt, // 直接使用时间戳毫秒级
+			"createdAt":      session.CreatedAt, // 任务创建时间
+		}
+
+		// 添加完成时间（如果任务已完成）
+		if session.CompletedAt != nil {
+			task["completedAt"] = *session.CompletedAt
+		} else {
+			task["completedAt"] = nil
+		}
+
+		tasks = append(tasks, task)
+	}
+	return tasks, nil
+}
+
 // SearchUserTasksSimple 使用简化参数搜索指定用户的任务，支持单个查询关键词和分页
 func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams database.SimpleSearchParams, traceID string) ([]map[string]interface{}, error) {
-	log.Infof("开始简化搜索用户任务: trace_id=%s, username=%s, query=%s", traceID, username, searchParams.Query)
+	log.Infof("开始简化搜索用户任务: trace_id=%s, username=%s, query=%s, taskType=%s", traceID, username, searchParams.Query, searchParams.TaskType)
 
 	// 验证和设置默认分页参数
 	if searchParams.Page < 1 {
@@ -772,7 +807,7 @@ func (tm *TaskManager) SearchUserTasksSimple(username string, searchParams datab
 	// 从数据库搜索用户的任务列表
 	sessions, _, err := tm.taskStore.SearchUserSessionsSimple(username, searchParams)
 	if err != nil {
-		log.Errorf("简化搜索用户任务失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
+		log.Errorf("简化搜索用户任务失败: trace_id=%s, username=%s, taskType=%s, error=%v", traceID, username, searchParams.TaskType, err)
 		return nil, fmt.Errorf("搜索任务失败: %v", err)
 	}
 

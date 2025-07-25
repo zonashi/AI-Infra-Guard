@@ -192,6 +192,23 @@ func (s *TaskStore) GetUserSessions(username string) ([]*Session, error) {
 	return sessions, nil
 }
 
+// GetUserSessionsByType 获取用户的会话，支持可选的任务类型过滤
+func (s *TaskStore) GetUserSessionsByType(username string, taskType string) ([]*Session, error) {
+	query := s.db.Where("username = ?", username)
+
+	// 如果指定了任务类型，添加类型过滤
+	if taskType != "" {
+		query = query.Where("task_type = ?", taskType)
+	}
+
+	var sessions []*Session
+	err := query.Order("created_at DESC").Find(&sessions).Error
+	if err != nil {
+		return nil, err
+	}
+	return sessions, nil
+}
+
 // StoreEvent 存储事件消息
 func (s *TaskStore) StoreEvent(id string, sessionID string, eventType string, eventData interface{}, timestamp int64) error {
 	// 将事件数据序列化为JSON
@@ -230,6 +247,11 @@ func (s *TaskStore) GetSessionEventsByType(sessionID string, eventType string) (
 func (s *TaskStore) SearchUserSessionsSimple(username string, searchParams SimpleSearchParams) ([]*Session, int64, error) {
 	query := s.db.Model(&Session{}).Where("username = ?", username)
 
+	// 如果指定了任务类型，添加类型过滤
+	if searchParams.TaskType != "" {
+		query = query.Where("task_type = ?", searchParams.TaskType)
+	}
+
 	// 如果有查询关键词，在多个字段中搜索
 	if searchParams.Query != "" {
 		query = query.Where("title LIKE ? OR content LIKE ? OR task_type LIKE ?",
@@ -261,6 +283,7 @@ func (s *TaskStore) SearchUserSessionsSimple(username string, searchParams Simpl
 // SimpleSearchParams 简化搜索参数结构
 type SimpleSearchParams struct {
 	Query    string `json:"query"`     // 查询关键词，将在title、content、task_type字段中搜索
+	TaskType string `json:"task_type"` // 任务类型过滤
 	Page     int    `json:"page"`      // 页码
 	PageSize int    `json:"page_size"` // 每页大小
 }

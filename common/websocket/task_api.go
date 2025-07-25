@@ -406,16 +406,18 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 	username := c.GetString("username")
 
 	query := c.Query("q")
+	taskType := c.DefaultQuery("taskType", "")
 	var err error
 
-	log.Debugf("开始获取任务列表: trace_id=%s, username=%s", traceID, username)
+	log.Debugf("开始获取任务列表: trace_id=%s, username=%s, taskType=%s", traceID, username, taskType)
 	var results []map[string]interface{}
 	if query != "" {
-		log.Debugf("搜索参数: trace_id=%s, username=%s, query=%s", traceID, username)
+		log.Debugf("搜索参数: trace_id=%s, username=%s, query=%s, taskType=%s", traceID, username, query, taskType)
 		var searchParams database.SimpleSearchParams
 
-		// 从查询字符串获取搜索关键词
+		// 从查询字符串获取搜索关键词和任务类型
 		searchParams.Query = query
+		searchParams.TaskType = taskType
 		searchParams.Page = 1
 		searchParams.PageSize = 999
 		// 调用TaskManager进行简化搜索
@@ -431,8 +433,8 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 		}
 
 	} else {
-		// 获取用户的任务列表
-		results, err = tm.GetUserTasks(username, traceID)
+		// 获取用户的任务列表（支持taskType过滤）
+		results, err = tm.GetUserTasksByType(username, taskType, traceID)
 		if err != nil {
 			log.Errorf("获取任务列表失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
 			c.JSON(http.StatusOK, gin.H{
