@@ -125,13 +125,7 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 
 	//2. 发送步骤运行状态
 	statusId01 := uuid.New().String()
-	callbacks.StepStatusUpdateCallback(step01, statusId01, AgentStatusCompleted, "A.I.G正在工作", "开始初始化AI基础设施扫描环境")
-
-	//3. 初始化扫描器
-	toolId01 := uuid.New().String()
-	callbacks.ToolUsedCallback(step01, statusId01, "初始化扫描器",
-		[]Tool{CreateTool(toolId01, "scanner_init", ToolStatusDone, "正在初始化扫描器", "初始化", "扫描配置", "")})
-
+	callbacks.StepStatusUpdateCallback(step01, statusId01, AgentStatusRunning, "A.I.G正在工作", "开始初始化AI基础设施扫描环境")
 	// 深拷贝options
 	opts := &options.Options{
 		TimeOut:      reqScan.Timeout,
@@ -156,19 +150,32 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 	mu := sync.Mutex{}
 	step02 := tasks[1].StepId
 	statusId02 := uuid.New().String()
+	statustool := uuid.New().String()
+	toolId02 := uuid.New().String()
+
 	processFunc := func(data interface{}) {
 		mu.Lock()
 		defer mu.Unlock()
 		switch v := data.(type) {
 		case runner.CallbackScanResult:
-			statusId := uuid.New().String()
 			scanResults = append(scanResults, v)
-			callbacks.StepStatusUpdateCallback(step02, statusId, AgentStatusCompleted, "发现结果", fmt.Sprintf("URL:%s 状态码:%d 标题:%s ", v.TargetURL, v.StatusCode, v.Title)+fmt.Sprintf("[%s]", v.Fingerprint))
-			if len(v.Vulnerabilities) > 0 {
-				for _, vuln := range v.Vulnerabilities {
-					callbacks.StepStatusUpdateCallback(step02, statusId, AgentStatusCompleted, "发现漏洞", fmt.Sprintf("CVE:%s\n描述:%s\n详情:%s", vuln.CVEName, vuln.Summary, vuln.Details))
-				}
+			var log string = ""
+			var appFinger string
+			if v.Fingerprint != "" {
+				appFinger = fmt.Sprintf("WEB应用: %s ", v.Fingerprint)
 			}
+			if len(v.Vulnerabilities) > 0 {
+				log = fmt.Sprintf("URL:%s %s发现漏洞:%d", v.TargetURL, appFinger, len(v.Vulnerabilities))
+			} else {
+				log = fmt.Sprintf("URL:%s %s扫描完成,未发现漏洞", v.TargetURL, appFinger)
+			}
+			callbacks.ToolUseLogCallback(toolId02, "ai_scanner", step02, log)
+			callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "发现结果", log)
+			//if len(v.Vulnerabilities) > 0 {
+			//	for _, vuln := range v.Vulnerabilities {
+			//		callbacks.StepStatusUpdateCallback(step02, statusId, AgentStatusCompleted, "发现漏洞", fmt.Sprintf("CVE:%s\n描述:%s\n详情:%s", vuln.CVEName, vuln.Summary, vuln.Details))
+			//	}
+			//}
 		case runner.CallbackProcessInfo:
 		case runner.CallbackReportInfo:
 		case runner.Step01:
@@ -195,9 +202,9 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 
 	//5. 创建runner并执行扫描
 	callbacks.NewPlanStepCallback(step02, "执行AI基础设施扫描")
-	callbacks.StepStatusUpdateCallback(step02, statusId02, AgentStatusRunning, "A.I.G正在工作", "正在创建扫描器实例...")
+	callbacks.StepStatusUpdateCallback(step02, statusId02, AgentStatusCompleted, "A.I.G正在工作", "正在创建扫描器实例...")
 
-	toolId02 := uuid.New().String()
+	//statusId03 := uuid.NewString()
 	callbacks.ToolUsedCallback(step02, statusId02, "执行扫描",
 		[]Tool{CreateTool(toolId02, "ai_scanner", ToolStatusDoing, "正在执行AI基础设施扫描", "扫描", "目标系统", "")})
 
@@ -226,11 +233,10 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 	step03 := tasks[2].StepId
 	callbacks.NewPlanStepCallback(step03, "生成扫描报告")
 
-	statusId03 := uuid.New().String()
-	callbacks.StepStatusUpdateCallback(step03, statusId03, AgentStatusCompleted, "A.I.G正在工作", "生成扫描报告")
+	callbacks.StepStatusUpdateCallback(step03, statustool, AgentStatusCompleted, "A.I.G正在工作", "生成扫描报告")
 
 	toolId03 := uuid.New().String()
-	callbacks.ToolUsedCallback(step03, statusId03, "生成报告",
+	callbacks.ToolUsedCallback(step03, statustool, "生成报告",
 		[]Tool{CreateTool(toolId03, "report_generator", ToolStatusDoing, "正在生成扫描报告", "生成报告", "", fmt.Sprintf("%d", len(scanResults)))})
 
 	//8. 发送任务最终结果

@@ -4,20 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 // FileUploadConfig 文件上传配置
 type FileUploadConfig struct {
 	UploadDir string `json:"upload_dir"` // 文件上传目录
-	BaseURL   string `json:"base_url"`   // 文件访问的基础URL
 }
 
 // DefaultFileUploadConfig 默认文件上传配置
 func DefaultFileUploadConfig() *FileUploadConfig {
 	return &FileUploadConfig{
 		UploadDir: "./uploads",
-		BaseURL:   "/uploads",
 	}
 }
 
@@ -30,10 +27,6 @@ func LoadFileUploadConfigFromEnv() *FileUploadConfig {
 		config.UploadDir = uploadDir
 	}
 
-	if baseURL := os.Getenv("FILE_BASE_URL"); baseURL != "" {
-		config.BaseURL = baseURL
-	}
-
 	return config
 }
 
@@ -43,17 +36,6 @@ func (c *FileUploadConfig) ValidateConfig() error {
 	if err := c.ensureUploadDir(); err != nil {
 		return fmt.Errorf("存储目录配置错误: %v", err)
 	}
-
-	// 检查BaseURL格式
-	if c.BaseURL == "" {
-		return fmt.Errorf("BaseURL不能为空")
-	}
-
-	// 确保BaseURL以/开头
-	if !strings.HasPrefix(c.BaseURL, "/") {
-		c.BaseURL = "/" + c.BaseURL
-	}
-
 	return nil
 }
 
@@ -100,5 +82,5 @@ func (c *FileUploadConfig) checkDirWritable(dir string) error {
 
 // GetFileURL 根据文件名生成完整的文件访问URL
 func (c *FileUploadConfig) GetFileURL(fileName string) string {
-	return fmt.Sprintf("%s/%s", c.BaseURL, fileName)
+	return fileName
 }

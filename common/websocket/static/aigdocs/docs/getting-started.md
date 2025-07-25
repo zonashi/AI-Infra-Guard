@@ -2,80 +2,114 @@
 
 本章节将指导您如何快速部署和使用A.I.G。
 
-## a) 一键安装
+## 一键安装
 
 ### 一键Docker部署
 
-为了方便用户快速体验，我们提供了Docker镜像。
+
+安装git / docker 等基础组件
+
+### 从Docker Hub安装
 
 ```bash
-# 拉取最新的Docker镜像
-docker pull tencent/ai-infra-guard
-
-# 运行WebUI模式
-docker run -it -p 8080:8080 tencent/ai-infra-guard webserver
+xxx
 ```
 
-然后，您可以通过浏览器访问 `http://localhost:8080` 来使用A.I.G的Web界面。
-
-### 从源码编译
-
-如果您希望自行编译，请确保您已安装Go语言环境（1.18或更高版本）。
+### 从Github下载安装最新版
 
 ```bash
-# 克隆项目仓库
-git clone `https://github.com/Tencent/AI-Infra-Guard.git`
-cd AI-Infra-Guard
-
-# 编译
-go build .
-
-# 运行
-./ai-infra-guard webserver
+git clone xxx
+cd xxx
+docker-compose -f docker-compose.images.yml up -d
 ```
 
-## b) 集成到安全流水线
+安装完成后，您可以通过浏览器访问 `http://localhost:8088` 来使用A.I.G的Web界面。
 
-A.I.G提供了命令行接口（CLI），可以方便地集成到您的CI/CD或其他自动化安全流水线中。
+### 从源码编译Docker
+
+如果您希望从最新的源码编译docker镜像。
 
 ```bash
-# 扫描单个URL
-./ai-infra-guard scan --url `http://testphp.vulnweb.com`
-
-# 扫描多个URL
-./ai-infra-guard scan -f urls.txt
-
-# 将扫描结果保存为JSON格式
-./ai-infra-guard scan --url `http://testphp.vulnweb.com`  --json result.json
+docker-compose up -d
 ```
 
-## c) 基础配置
+## 一键配置
 
-A.I.G的核心配置文件位于 `config.yaml`。您可以根据需要修改以下配置：
+### 一键Docker部署
 
-*   **代理设置**: 配置HTTP/HTTPS代理，用于网络请求。
-*   **并发设置**: 调整扫描任务的并发数，以平衡扫描速度和资源消耗。
-*   **超时设置**: 设置网络请求的超时时间。
-*   **自定义规则路径**: 指定自定义指纹和漏洞规则的存放目录。
+通过Web界面的“模型管理”功能可配置A.I.G使用的API KEY
 
-## d) 核心功能使用
+通过配置文件xxx配置。
 
-A.I.G的核心功能是`scan`（扫描）和`mcp`（MCP分析）。
 
-### `scan`功能
 
-`scan`命令用于扫描Web资产，发现已知的组件漏洞。
+### 服务架构
+
+```
+┌─────────────────┐    ┌─────────────────┐
+│   Webserver     │    │     Agent       │
+│   (Go + Web)    │◄──►│ (Go + Python)   │
+│   Port: 8088    │    │                 │
+└─────────────────┘    └─────────────────┘
+         │                       │
+         └───────┬───────────────┘
+                 │
+    ┌─────────────────────────┐
+    │   Shared Data Volume    │
+    │      (data/ dir)        │
+    └─────────────────────────┘
+```
+
+
+
+### 常见问题
+
+1. **端口冲突**
+   ```bash
+   # 修改webserver端口映射
+   ports:
+     - "8080:8088"  # 使用8080端口
+   ```
+
+2. **权限问题**
+   ```bash
+   # 检查数据目录权限
+   sudo chown -R $USER:$USER ./data
+   ```
+
+3. **服务启动失败**
+   ```bash
+   # 查看详细日志
+   docker-compose logs webserver
+   docker-compose logs agent
+   ```
+
+4. **停止服务**
+    ```bash
+    # 停止服务
+    docker-compose down
+
+    # 停止服务并删除数据卷（谨慎使用）
+    docker-compose down -v
+    ```
+
+5. **模型API错误**
+
+6. **加载指纹失败**
+
+
+## 更新升级
 
 ```bash
-# 扫描一个示例漏洞网站
-./ai-infra-guard scan --url `http://testphp.vulnweb.com`
-```
+# 拉取最新代码
+git pull
 
-### `mcp`功能
+# 重新构建并启动
+docker-compose up -d --build
 
-`mcp`命令用于分析MCP服务器的安全性。
+# 清理旧镜像
+docker image prune -f
+``` 
 
-```bash
-# 扫描一个远程MCP服务器
-./ai-infra-guard mcp --url `https://example-mcp-server.com`
-```
+
+

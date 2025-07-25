@@ -722,8 +722,6 @@ func (tm *TaskManager) UploadFile(file *multipart.FileHeader, traceID string) (*
 
 // GetUserTasks 获取指定用户的任务列表，只返回属于该用户的会话，确保用户只能看到自己的任务。
 func (tm *TaskManager) GetUserTasks(username string, traceID string) ([]map[string]interface{}, error) {
-	log.Infof("开始获取用户任务列表: trace_id=%s, username=%s", traceID, username)
-
 	// 从数据库获取用户的任务列表
 	sessions, err := tm.taskStore.GetUserSessions(username)
 	if err != nil {
@@ -753,8 +751,6 @@ func (tm *TaskManager) GetUserTasks(username string, traceID string) ([]map[stri
 
 		tasks = append(tasks, task)
 	}
-
-	log.Infof("获取用户任务列表成功: trace_id=%s, username=%s, taskCount=%d", traceID, username, len(tasks))
 	return tasks, nil
 }
 

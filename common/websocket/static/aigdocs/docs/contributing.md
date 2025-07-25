@@ -20,23 +20,8 @@ A.I.G的核心能力之一就是其丰富的指纹库和漏洞规则。我们非
 
 ## c) 致谢
 
-感谢以下对A.I.G项目有过贡献的核心开发者们（示例数据）：
+感谢以下对A.I.G项目有过贡献的核心开发者：
 
-<div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
-  <div style="text-align: center;">
-    <img src="https://via.placeholder.com/80" alt="贡献者头像" style="border-radius: 50%; width: 80px; height: 80px;">
-    <p>A @ 腾讯微信安全xxx</p>
-  </div>
-  <div style="text-align: center;">
-    <img src="https://via.placeholder.com/80" alt="贡献者头像" style="border-radius: 50%; width: 80px; height: 80px;">
-    <p>B @ 微信支付安全xxx</p>
-  </div>
-  <div style="text-align: center;">
-    <img src="https://via.placeholder.com/80" alt="贡献者头像" style="border-radius: 50%; width: 80px; height: 80px;">
-    <p>C @ DeepSeek xx</p>
-  </div>
-  <div style="text-align: center;">
-    <img src="https://via.placeholder.com/80" alt="贡献者头像" style="border-radius: 50%; width: 80px; height: 80px;">
-    <p>D @ 科恩实验室 xx</p>
-  </div>
-</div>
+<a href="https://github.com/Tencent/AI-Infra-Guard/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
+</a>

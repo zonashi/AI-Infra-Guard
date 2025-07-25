@@ -27,7 +27,8 @@
       "提供远程MCP Server URL，如：https://xxx.com/mcp-server/sse?token=xxx"
     ],
     "attachmentTypes": [".zip", ".tar.gz", ".tgz", ".whl"],
-    "model": "yes"
+    "model": "yes",
+    "modelTips": "使用 {model} 检测"
   },
   {
     "id": "Model-Redteam-Report",
@@ -35,10 +36,11 @@
     "description": "批量测试大模型API在处理恶意、对抗或诱导性输入时的输出，帮助开发者了解评估不同大模型API的安全性并加固模型的安全护栏",
     "triggerWord": "@模型越狱评测",
     "icon": "AlertTriangle",
-    "placeholderPrefix": "支持上传评测数据集（非必须）、选择大模型进行自动化越狱评测",
+    "placeholderPrefix": "支持上传自定义评测数据集（不上传则使用内置数据集）进行自动化越狱评测",
     "placeholder": [],
     "attachmentTypes": [".csv", ".json", ".jsonl", ".txt"],
-    "model": "yes"
+    "model": "yes",
+    "modelTips": "即将评测 {model}"
   },
   {
     "id": "Model-Jailbreak",
@@ -49,6 +51,7 @@
     "placeholderPrefix": "输入“恶意”对话内容，自动评测模型是否存在越狱风险，如：制造炸弹",
     "placeholder": [],
     "attachmentTypes": [".csv", ".json", ".jsonl", ".txt"],
-    "model": "yes"
+    "model": "yes",
+    "modelTips": "即将评测 {model}"
   }
 ]
