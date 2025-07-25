@@ -76,7 +76,6 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		tasks = append(tasks, CreateSubTask(SubTaskStatusTodo, title, 0, strconv.Itoa(i+1)))
 	}
 	callbacks.PlanUpdateCallback(tasks)
-	tmpFile := filepath.Join(os.TempDir(), fmt.Sprintf("tmp-%d.md", time.Now().UnixNano()))
 
 	err := utils.RunCmd(DIR, NAME, []string{
 		"run",
@@ -87,7 +86,6 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		"--scenarios", scenarios,
 		"--techniques", "Raw",
 		"--choice", "serial",
-		"--report", tmpFile,
 	}, func(line string) {
 		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
 	})
@@ -129,8 +127,6 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 		tasks = append(tasks, CreateSubTask(SubTaskStatusTodo, title, 0, strconv.Itoa(i+1)))
 	}
 	callbacks.PlanUpdateCallback(tasks)
-	// 取临时文件
-	tmpFile := filepath.Join(os.TempDir(), fmt.Sprintf("tmp-%d.md", time.Now().UnixNano()))
 
 	err := utils.RunCmd(DIR, NAME, []string{
 		"run",
@@ -141,7 +137,6 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 		"--scenarios", fmt.Sprintf("Custom:prompt=%s", param.Prompt),
 		"--techniques", "ICRTJailbreak", "Ecoji", "Zalgo", "CrescendoJailbreaking",
 		"--choice", "parallel",
-		"--report", tmpFile,
 	}, func(line string) {
 		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
 	})

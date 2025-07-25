@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,8 +24,6 @@ func getTraceID(c *gin.Context) string {
 	return "unknown"
 }
 
-// 参数校验函数
-
 // isValidSessionID 验证会话ID格式
 func isValidSessionID(sessionId string) bool {
 	// 只允许字母、数字、下划线、连字符
@@ -46,42 +43,6 @@ func validateFileUpload(header *multipart.FileHeader) error {
 	if strings.Contains(originalName, "..") || strings.Contains(originalName, "/") || strings.Contains(originalName, "\\") {
 		return fmt.Errorf("文件名包含非法字符")
 	}
-
-	// 2. 文件扩展名验证
-	ext := strings.ToLower(filepath.Ext(originalName))
-	allowedExtensions := map[string]bool{
-		".txt":  true,
-		".pdf":  true,
-		".doc":  true,
-		".docx": true,
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".zip":  true,
-		".rar":  true,
-	}
-	if !allowedExtensions[ext] {
-		return fmt.Errorf("不支持的文件类型: %s", ext)
-	}
-
-	// 3. 文件内容类型验证
-	contentType := header.Header.Get("Content-Type")
-	allowedMimeTypes := map[string]bool{
-		"text/plain":         true,
-		"application/pdf":    true,
-		"application/msword": true,
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
-		"image/jpeg":                   true,
-		"image/png":                    true,
-		"image/gif":                    true,
-		"application/zip":              true,
-		"application/x-rar-compressed": true,
-	}
-	if !allowedMimeTypes[contentType] {
-		return fmt.Errorf("不支持的文件内容类型: %s", contentType)
-	}
-
 	return nil
 }
 
@@ -447,10 +408,10 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 	query := c.Query("q")
 	var err error
 
-	log.Infof("开始获取任务列表: trace_id=%s, username=%s", traceID, username)
+	log.Debugf("开始获取任务列表: trace_id=%s, username=%s", traceID, username)
 	var results []map[string]interface{}
 	if query != "" {
-		log.Infof("搜索参数: trace_id=%s, username=%s, query=%s", traceID, username)
+		log.Debugf("搜索参数: trace_id=%s, username=%s, query=%s", traceID, username)
 		var searchParams database.SimpleSearchParams
 
 		// 从查询字符串获取搜索关键词
@@ -483,7 +444,7 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 		}
 	}
 
-	log.Infof("获取任务列表成功: trace_id=%s, username=%s, taskCount=%d", traceID, username, len(results))
+	log.Debugf("获取任务列表成功: trace_id=%s, username=%s, taskCount=%d", traceID, username, len(results))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
@@ -529,7 +490,7 @@ func HandleSearchTasks(c *gin.Context, tm *TaskManager) {
 		searchParams.PageSize = 10
 	}
 
-	log.Infof("搜索参数: trace_id=%s, username=%s, query=%s, page=%d, pageSize=%d", traceID, username, searchParams.Query, searchParams.Page, searchParams.PageSize)
+	log.Debugf("搜索参数: trace_id=%s, username=%s, query=%s, page=%d, pageSize=%d", traceID, username, searchParams.Query, searchParams.Page, searchParams.PageSize)
 
 	// 调用TaskManager进行简化搜索
 	result, err := tm.SearchUserTasksSimple(username, searchParams, traceID)

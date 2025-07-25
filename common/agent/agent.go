@@ -246,8 +246,9 @@ func (a *Agent) processMessage(data []byte) error {
 				// 创建回调函数集合
 				callbacks := TaskCallbacks{
 					ResultCallback: func(result map[string]interface{}) {
-						a.SendTaskResult(task.SessionId, result)
 						gologger.Debugln("ResultCallback", result)
+						a.SendTaskResult(task.SessionId, result)
+						gologger.Debugln("ResultCallback end")
 					},
 					ToolUseLogCallback: func(actionId, tool, planStepId, actionLog string) {
 						a.SendsToolUsedLog(task.SessionId, actionId, tool, planStepId, actionLog)

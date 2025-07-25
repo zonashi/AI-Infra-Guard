@@ -49,7 +49,7 @@ func HandleGetModelList(c *gin.Context, mm *ModelManager) {
 	traceID := getTraceID(c)
 	username := c.GetString("username")
 
-	log.Infof("用户请求获取模型列表: trace_id=%s, username=%s", traceID, username)
+	log.Debugf("用户请求获取模型列表: trace_id=%s, username=%s", traceID, username)
 
 	var userModels []*database.Model
 	var publicModels []*database.Model
@@ -109,7 +109,7 @@ func HandleGetModelList(c *gin.Context, mm *ModelManager) {
 		result = append(result, item)
 	}
 
-	log.Infof("获取模型列表成功: trace_id=%s, username=%s, userModels=%d, publicModels=%d, total=%d",
+	log.Debugf("获取模型列表成功: trace_id=%s, username=%s, userModels=%d, publicModels=%d, total=%d",
 		traceID, username, len(userModels), len(publicModels), len(result))
 
 	c.JSON(http.StatusOK, gin.H{
@@ -136,7 +136,7 @@ func HandleGetModelDetail(c *gin.Context, mm *ModelManager) {
 		return
 	}
 
-	log.Infof("用户请求获取模型详情: trace_id=%s, modelID=%s, username=%s", traceID, modelID, username)
+	log.Debugf("用户请求获取模型详情: trace_id=%s, modelID=%s, username=%s", traceID, modelID, username)
 
 	// 2. 获取模型信息
 	model, err := mm.modelStore.GetModel(modelID)
@@ -161,7 +161,7 @@ func HandleGetModelDetail(c *gin.Context, mm *ModelManager) {
 		return
 	}
 
-	log.Infof("获取模型详情成功: trace_id=%s, modelID=%s, username=%s", traceID, modelID, username)
+	log.Debugf("获取模型详情成功: trace_id=%s, modelID=%s, username=%s", traceID, modelID, username)
 
 	// 转换为期望的返回格式
 	result := map[string]interface{}{
@@ -239,7 +239,7 @@ func HandleCreateModel(c *gin.Context, mm *ModelManager) {
 		return
 	}
 
-	log.Infof("用户请求创建模型: trace_id=%s, modelID=%s, modelName=%s, username=%s", traceID, req.ModelID, req.Model.Model, username)
+	log.Debugf("用户请求创建模型: trace_id=%s, modelID=%s, modelName=%s, username=%s", traceID, req.ModelID, req.Model.Model, username)
 
 	// 3. 检查模型是否已存在
 	exists, err := mm.modelStore.CheckModelExists(req.ModelID)
@@ -284,7 +284,7 @@ func HandleCreateModel(c *gin.Context, mm *ModelManager) {
 		return
 	}
 
-	log.Infof("创建模型成功: trace_id=%s, modelID=%s, modelName=%s, username=%s", traceID, req.ModelID, req.Model.Model, username)
+	log.Debugf("创建模型成功: trace_id=%s, modelID=%s, modelName=%s, username=%s", traceID, req.ModelID, req.Model.Model, username)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
