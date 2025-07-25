@@ -32,21 +32,12 @@ type EvaluationDataItem struct {
 type EvaluationDataset struct {
 	Name           string               `json:"name"`
 	Description    string               `json:"description"`
+	DescriptionZh  string               `json:"description_zh,omitempty"`
 	Count          int                  `json:"count"`
 	Tags           []string             `json:"tags,omitempty"`
 	Recommendation int                  `json:"recommendation,omitempty"`
 	Language       string               `json:"language,omitempty"`
 	Data           []EvaluationDataItem `json:"data"`
-}
-
-// 评测集摘要结构体（不包含data字段，用于列表接口）
-type EvaluationDatasetSummary struct {
-	Name           string   `json:"name"`
-	Description    string   `json:"description"`
-	Count          int      `json:"count"`
-	Tags           []string `json:"tags,omitempty"`
-	Recommendation int      `json:"recommendation,omitempty"`
-	Language       string   `json:"language,omitempty"`
 }
 
 // 获取指纹列表，支持分页和名字模糊
