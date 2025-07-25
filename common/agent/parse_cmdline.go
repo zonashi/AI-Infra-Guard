@@ -6,7 +6,6 @@ import (
 	"github.com/Tencent/AI-Infra-Guard/internal/gologger"
 	"github.com/google/uuid"
 	"path"
-	"time"
 )
 
 type CmdNewPlanStep struct {
@@ -114,9 +113,7 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 			tasks[i].Status = SubTaskStatusDone
 		}
 		callbacks.PlanUpdateCallback(tasks)
-		time.Sleep(1 * time.Second)
-		callbacks.ResultCallback(content)
-		var ret PromptContent
+		var ret []PromptContent
 		dd, err := json.Marshal(content["content"])
 		if err != nil {
 			gologger.WithError(err).Errorln("Failed to parse result file json")
@@ -127,23 +124,30 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 			return
 		}
 		gologger.Infoln("开始上传文件")
-		info, err := UploadFile(server, path.Join(rootDir, ret.Attachment))
-		if err != nil {
-			gologger.WithError(err).Errorln("Failed to upload file")
-			return
+		for i, v := range ret {
+			if v.Attachment == "" {
+				continue
+			}
+			info, err := UploadFile(server, path.Join(rootDir, v.Attachment))
+			if err != nil {
+				gologger.WithError(err).Errorln("Failed to upload file")
+				return
+			}
+			gologger.Infoln("上传文件成功")
+			v.Attachment = info.Data.FileUrl
+			ret[i] = v
 		}
-		gologger.Infoln("上传文件成功")
-		ret.Attachment = info.Data.FileUrl
 		dd, err = json.Marshal(ret)
 		if err != nil {
 			gologger.WithError(err).Errorln("Failed to parse result file json")
 			return
 		}
-		var content2 map[string]interface{}
+		var content2 []map[string]interface{}
 		if err := json.Unmarshal(dd, &content2); err != nil {
 			gologger.WithError(err).Errorln("Failed to parse result file json")
 			return
 		}
-		callbacks.ResultCallback(content2)
+		content["content"] = content2
+		callbacks.ResultCallback(content)
 	}
 }

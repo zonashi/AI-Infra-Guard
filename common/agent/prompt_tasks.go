@@ -15,6 +15,8 @@ import (
 const (
 	DIR  = "/app/AIG-PromptSecurity"
 	NAME = "/usr/local/bin/uv"
+	//DIR = "/Users/python/Downloads/AIG-PromptSecurity"
+	//NAME = "/Users/python/.local/bin/uv"
 )
 
 type ModelRedteamReport struct {

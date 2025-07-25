@@ -1012,75 +1012,18 @@ func (tm *TaskManager) extractFileNameFromURL(url string) string {
 func (tm *TaskManager) DownloadFile(sessionId string, fileUrl string, username string, c *gin.Context, traceID string) error {
 	log.Infof("开始文件下载: trace_id=%s, sessionId=%s, fileUrl=%s, username=%s", traceID, sessionId, fileUrl, username)
 
-	// 1. 检查任务是否存在
-	session, err := tm.taskStore.GetSession(sessionId)
-	if err != nil {
-		log.Errorf("任务不存在: trace_id=%s, sessionId=%s, error=%v", traceID, sessionId, err)
-		return fmt.Errorf("任务不存在")
+	filename := strings.TrimLeft(fileUrl, "/")
+	filePath, _ := filepath.Abs(filepath.Join(tm.fileConfig.UploadDir, filename))
+
+	if !strings.HasPrefix(filePath, tm.fileConfig.UploadDir) {
+		return fmt.Errorf("文件路径不合法")
 	}
 
-	// 3. 验证文件URL是否属于该任务
-	if session.Attachments == nil {
-		log.Errorf("任务无附件: trace_id=%s, sessionId=%s", traceID, sessionId)
-		return fmt.Errorf("文件不存在于此任务中")
-	}
-
-	var attachmentURLs []string
-	if err := json.Unmarshal(session.Attachments, &attachmentURLs); err != nil {
-		log.Errorf("解析任务附件失败: trace_id=%s, sessionId=%s, error=%v", traceID, sessionId, err)
-		return fmt.Errorf("解析任务附件失败")
-	}
-
-	// 检查fileUrl是否在任务的附件列表中
-	fileExists := false
-	for _, url := range attachmentURLs {
-		if url == fileUrl {
-			fileExists = true
-			break
-		}
-	}
-
-	if !fileExists {
-		log.Warnf("文件不在任务附件列表中: trace_id=%s, sessionId=%s, fileUrl=%s", traceID, sessionId, fileUrl)
-		return fmt.Errorf("文件不存在于此任务中")
-	}
-
-	// 4. 从fileUrl中提取文件名
-	fileName := tm.extractFileNameFromURL(fileUrl)
-	if fileName == fileUrl {
-		// 如果无法提取文件名，使用URL的最后部分
-		if strings.Contains(fileUrl, "/") {
-			parts := strings.Split(fileUrl, "/")
-			fileName = parts[len(parts)-1]
-		} else {
-			fileName = fileUrl
-		}
-	}
-
-	// 5. 构建本地文件路径（使用URL的最后部分，即完整的文件名）
-	localFileName := ""
-	if strings.Contains(fileUrl, "/") {
-		parts := strings.Split(fileUrl, "/")
-		localFileName = parts[len(parts)-1]
-	} else {
-		localFileName = fileUrl
-	}
-
-	filePath := filepath.Join(tm.fileConfig.UploadDir, localFileName)
-
-	log.Debugf("文件下载路径信息: trace_id=%s, fileUrl=%s, fileName=%s, localFileName=%s, filePath=%s",
-		traceID, fileUrl, fileName, localFileName, filePath)
-	// 添加调试日志
-	// gologger.Debugf("文件下载调试信息: trace_id=%s, fileUrl=%s, localFileName=%s, filePath=%s, uploadDir=%s",
-	// 	traceID, fileUrl, localFileName, filePath, tm.fileConfig.UploadDir)
-
-	// 6. 检查文件是否存在
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		log.Errorf("本地文件不存在: trace_id=%s, filePath=%s", traceID, filePath)
 		return fmt.Errorf("文件不存在")
 	}
 
-	// 7. 获取文件信息
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		log.Errorf("获取文件信息失败: trace_id=%s, filePath=%s, error=%v", traceID, filePath, err)
@@ -1091,7 +1034,7 @@ func (tm *TaskManager) DownloadFile(sessionId string, fileUrl string, username s
 
 	// 8. 设置响应头
 	// 获取文件的MIME类型
-	ext := filepath.Ext(fileName)
+	ext := filepath.Ext(filePath)
 	mimeType := mime.TypeByExtension(ext)
 	if mimeType == "" {
 		mimeType = "application/octet-stream"
@@ -1102,8 +1045,8 @@ func (tm *TaskManager) DownloadFile(sessionId string, fileUrl string, username s
 
 	// 设置Content-Disposition，支持中文文件名
 	// 使用UTF-8编码处理中文文件名
-	encodedFileName := url.QueryEscape(fileName)
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", fileName, encodedFileName))
+	encodedFileName := url.QueryEscape(filepath.Base(filePath))
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", encodedFileName, encodedFileName))
 
 	// 设置Content-Length
 	c.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
@@ -1122,9 +1065,7 @@ func (tm *TaskManager) DownloadFile(sessionId string, fileUrl string, username s
 		log.Errorf("文件传输失败: trace_id=%s, filePath=%s, error=%v", traceID, filePath, err)
 		return fmt.Errorf("传输文件失败: %v", err)
 	}
-
 	log.Infof("文件下载成功: trace_id=%s, sessionId=%s, fileName=%s, fileSize=%d, transmittedSize=%d",
-		traceID, sessionId, fileName, fileInfo.Size(), written)
-
+		traceID, sessionId, filePath, fileInfo.Size(), written)
 	return nil
 }

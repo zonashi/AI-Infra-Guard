@@ -121,10 +121,6 @@ func RunWebServer(options *options.Options) {
 				tasks.GET("", func(c *gin.Context) {
 					HandleGetTaskList(c, taskManager)
 				})
-				// 搜索任务接口
-				tasks.GET("/search", func(c *gin.Context) {
-					HandleSearchTasks(c, taskManager)
-				})
 				// 获取任务详情接口
 				tasks.GET("/:sessionId", func(c *gin.Context) {
 					HandleGetTaskDetail(c, taskManager)
