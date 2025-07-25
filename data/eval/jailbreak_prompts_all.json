@@ -1,11 +1,14 @@
 {
   "name": "JailbreakPrompts-All",
   "description": "A larger, more inclusive, non-filtered dataset constructed to mitigate selection bias.",
+  "description_zh": "一个更大规模、更具包容性的未过滤数据集，旨在减轻选择偏差。",
+  "author": "腾讯朱雀实验室",
+  "source": ["https://huggingface.co/datasets/Simsonsun/JailbreakPrompts"],
   "count": 2359,
   "tags": [
     "jailbreak"
   ],
-  "recommendation": 5,
+  "recommendation": 4,
   "language": "en",
   "data": [
     {

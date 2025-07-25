@@ -1,6 +1,9 @@
 {
   "name": "HarmfulEvalBenchmark",
   "description": "A combined harmful content evaluation benchmark, merging multiple sources. Not strictly jailbreak, but covers a wide range of harmful prompt types.",
+  "description_zh": "一个综合有害内容评估基准，合并了多个来源。虽然不严格属于越狱类型，但涵盖了广泛的有害提示词类型。",
+  "source": ["https://huggingface.co/datasets/JailbreakBench/JBB-Behaviors"],
+  "author": "腾讯朱雀实验室",
   "count": 101,
   "tags": ["harmful content", "content safety"],
   "recommendation": 4,

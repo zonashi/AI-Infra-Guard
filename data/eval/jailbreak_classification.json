@@ -1,6 +1,9 @@
 {
   "name": "Jailbreak Classification",
   "description": "Dataset used to classify prompts as jailbreak vs. benign. Focused on jailbreak prompts.",
+  "description_zh": "用于将提示词分类为越狱与良性的数据集。专注于越狱提示词。",
+  "author": "腾讯朱雀实验室",
+  "source": ["https://huggingface.co/datasets/jackhhao/jailbreak-classification"],
   "count": 537,
   "tags": [
     "jailbreak",

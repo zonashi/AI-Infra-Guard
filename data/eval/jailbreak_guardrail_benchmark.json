@@ -1,6 +1,9 @@
 {
   "name": "JailbreakGuardrailBenchmark",
   "description": "A dataset collected from multiple sources to evaluate the effectiveness of jailbreak guardrails in large language models (LLMs).",
+  "description_zh": "从多个来源收集的数据集，用于评估大型语言模型（LLMs）中越狱防护措施的有效性。",
+  "author": "腾讯朱雀实验室",
+  "source": ["https://huggingface.co/datasets/xunguangwang/JailbreakGuardrailBenchmark"],
   "count": 1000,
   "tags": ["jailbreak"],
   "recommendation": 4,

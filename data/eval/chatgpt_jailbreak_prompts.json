@@ -1,6 +1,9 @@
 {
   "name": "ChatGPT Jailbreak Prompts",
   "description": "ChatGPT Jailbreak Prompts is a complete collection of jailbreak related prompts for ChatGPT. This dataset is intended to provide a valuable resource for understanding and generating text in the context of jailbreaking in ChatGPT.",
+  "description_zh": "ChatGPT Jailbreak Prompts是一个关于ChatGPT越狱相关提示词的完整集合。该数据集旨在为理解和生成ChatGPT越狱场景下的文本提供有价值的资源。",
+  "source": ["https://huggingface.co/datasets/rubend18/ChatGPT-Jailbreak-Prompts"],
+  "author": "腾讯朱雀实验室",
   "count": 60,
   "tags": [
     "jailbreak"

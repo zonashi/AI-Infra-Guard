@@ -1,6 +1,9 @@
 {
   "name": "JailbreakPrompts-Top",
   "description": "A manually selected and filtered set of structurally diverse and high-quality jailbreak prompts.",
+  "description_zh": "一个经过人工筛选和过滤的数据集，包含结构多样且高质量的越狱提示词。",
+  "author": "腾讯朱雀实验室",
+  "source": ["https://huggingface.co/datasets/Simsonsun/JailbreakPrompts"],
   "count": 67,
   "tags": ["jailbreak"],
   "recommendation": 5,

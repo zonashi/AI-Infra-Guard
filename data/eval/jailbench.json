@@ -1,6 +1,9 @@
 {
   "name": "JailBench",
   "description": "JailBench is a security evaluation dataset for large language models (LLMs), focusing on jailbreak attack risks in Chinese context. It is designed based on the national standard \"Basic Security Requirements for Generative Artificial Intelligence Services\" and is currently the largest and most comprehensive Chinese jailbreak evaluation dataset.",
+  "description_zh": "JailBench是一个针对大型语言模型（LLMs）的安全评估数据集，专注于中文语境下的越狱攻击风险。该数据集基于国家标准《生成式人工智能服务安全基本要求》设计，是目前规模最大、最全面的中文越狱评估数据集。",
+  "author": "腾讯朱雀实验室",
+  "source": ["https://github.com/STAIR-BUPT/JailBench"],
   "count": 2160,
   "tags": ["jailbreak", "content compliance"],
   "recommendation": 5,
