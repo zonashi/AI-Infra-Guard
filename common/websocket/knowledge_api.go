@@ -623,18 +623,10 @@ func HandleListEvaluations(c *gin.Context) {
 					return err
 				}
 				// 转换为摘要格式（不包含data字段）
-				summary := EvaluationDataset{
-					Name:           eval.Name,
-					Description:    eval.Description,
-					Count:          eval.Count,
-					Tags:           eval.Tags,
-					Recommendation: eval.Recommendation,
-					Language:       eval.Language,
+				if detail != "true" {
+					eval.Data = nil
 				}
-				if detail == "true" {
-					summary.Data = eval.Data
-				}
-				allEvaluations = append(allEvaluations, summary)
+				allEvaluations = append(allEvaluations, eval)
 			}
 		}
 		return nil
