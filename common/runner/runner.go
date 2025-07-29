@@ -378,7 +378,7 @@ func (r *Runner) extractContent(fullUrl string, resp *httpx.Response, respTime s
 }
 
 // runHostRequest 尝试使用 HTTP 和 HTTPS 连接到主机
-func (r *Runner) runHostRequest(domain string) {
+func (r *Runner) runHostRequest(domain string) error {
 	retried := false
 	protocol := httpx.HTTP
 retry:
@@ -395,9 +395,10 @@ retry:
 			retried = true
 			goto retry
 		}
-		return
+		return err
 	}
 	r.extractContent(fullUrl, resp, time.Since(timeStart).String())
+	return nil
 }
 
 // runDomainRequest makes a request to a specific URL and processes the response
@@ -451,7 +452,13 @@ func (r *Runner) RunEnumeration() {
 			go func() {
 				defer wg.Done()
 				r.rateLimiter.Take()
-				r.runHostRequest(target)
+				err := r.runHostRequest(target)
+				if err != nil {
+					r.callback(CallbackErrorInfo{
+						Target: target,
+						Error:  err,
+					})
+				}
 				atomic.AddUint64(&numTarget, 1)
 				r.callbackProcess(int(atomic.LoadUint64(&numTarget)), r.total)
 			}()
@@ -459,7 +466,13 @@ func (r *Runner) RunEnumeration() {
 			go func() {
 				defer wg.Done()
 				r.rateLimiter.Take()
-				r.runDomainRequest(target)
+				err := r.runDomainRequest(target)
+				if err != nil {
+					r.callback(CallbackErrorInfo{
+						Target: target,
+						Error:  err,
+					})
+				}
 				atomic.AddUint64(&numTarget, 1)
 				r.callbackProcess(int(atomic.LoadUint64(&numTarget)), r.total)
 			}()

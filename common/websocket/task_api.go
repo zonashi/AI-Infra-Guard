@@ -404,7 +404,6 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 	traceID := getTraceID(c)
 	// 从中间件获取用户名
 	username := c.GetString("username")
-
 	query := c.Query("q")
 	taskType := c.DefaultQuery("taskType", "")
 	var err error

@@ -33,11 +33,14 @@ type EvaluationDataset struct {
 	Name           string               `json:"name"`
 	Description    string               `json:"description"`
 	DescriptionZh  string               `json:"description_zh,omitempty"`
+	Author         string               `json:"author,omitempty"`
+	Source         string               `json:"source,omitempty"`
 	Count          int                  `json:"count"`
 	Tags           []string             `json:"tags,omitempty"`
 	Recommendation int                  `json:"recommendation,omitempty"`
 	Language       string               `json:"language,omitempty"`
 	Data           []EvaluationDataItem `json:"data"`
+	RawFields      json.RawMessage      `json:"-"` // 存储未解析的字段
 }
 
 // 获取指纹列表，支持分页和名字模糊
@@ -143,13 +146,11 @@ func HandleCreateFingerprint(c *gin.Context) {
 		return
 	}
 
-	// 新增：用和读取时一致的解析逻辑做一次完整校验
 	if _, err := parser.InitFingerPrintFromData([]byte(req.FileContent)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "指纹内容校验失败: " + err.Error()})
 		return
 	}
 
-	// 3. 检查指纹名称是否已存在
 	if !isValidName(fp.Info.Name) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "指纹名称非法"})
 		return
@@ -160,13 +161,11 @@ func HandleCreateFingerprint(c *gin.Context) {
 		return
 	}
 
-	// 4. 写入YAML文件
 	if err := os.WriteFile(yamlPath, []byte(req.FileContent), 0644); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "文件写入失败: " + err.Error()})
 		return
 	}
 
-	// 5. 返回精简响应
 	c.JSON(http.StatusOK, gin.H{"status": 0, "message": "创建指纹成功"})
 }
 
@@ -365,29 +364,6 @@ func HandleListVulnerabilities() gin.HandlerFunc {
 			},
 		})
 	}
-}
-
-// createTempFileWithContent 创建一个临时文件并写入内容
-// 返回临时文件路径和一个清理函数
-func createTempFileWithContent(prefix string, content []byte) (string, func(), error) {
-	// 创建临时文件
-	tmpFile, err := os.CreateTemp("", prefix)
-	if err != nil {
-		return "", nil, fmt.Errorf("创建临时文件失败: %w", err)
-	}
-
-	// 写入内容
-	if err := os.WriteFile(tmpFile.Name(), content, 0600); err != nil {
-		os.Remove(tmpFile.Name())
-		return "", nil, fmt.Errorf("写入临时文件失败: %w", err)
-	}
-
-	// 返回清理函数
-	cleanup := func() {
-		os.Remove(tmpFile.Name())
-	}
-
-	return tmpFile.Name(), cleanup, nil
 }
 
 // 添加漏洞信息（带严格校验）
@@ -673,6 +649,10 @@ func HandleListEvaluations(c *gin.Context) {
 				continue
 			}
 			if strings.Contains(strings.ToLower(eval.Description), nameQuery) {
+				filteredEvaluations = append(filteredEvaluations, eval)
+				continue
+			}
+			if strings.Contains(strings.ToLower(eval.Author), nameQuery) {
 				filteredEvaluations = append(filteredEvaluations, eval)
 				continue
 			}

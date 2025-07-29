@@ -167,7 +167,6 @@ func (ac *AgentConnection) handleConnection(am *AgentManager) {
 		agentID := ac.agentID
 		remoteAddr := ac.conn.RemoteAddr().String()
 		ac.stateMu.RUnlock()
-
 		ac.cleanup(am)
 		log.Infof("Agent连接处理结束: agentId=%s, remoteAddr=%s", agentID, remoteAddr)
 	}()

@@ -67,6 +67,7 @@ var mcpCmd = &cobra.Command{
 
 		// 创建扫描器
 		scanner := mcp.NewScanner(aiModel, logger)
+		scanner.RegisterPlugin(nil)
 
 		// 设置输入
 		ctx := context.Background()

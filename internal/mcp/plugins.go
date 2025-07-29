@@ -15,14 +15,14 @@ import (
 
 type PluginConfig struct {
 	Info struct {
-		ID          string   `yaml:"id"`
-		Name        string   `yaml:"name"`
-		Description string   `yaml:"description"`
-		Author      string   `yaml:"author"`
-		Category    []string `yaml:"categories"`
-	} `yaml:"info"`
-	Rules          []Rule `yaml:"rules,omitempty"`
-	PromptTemplate string `yaml:"prompt_template"`
+		ID          string   `yaml:"id" json:"id"`
+		Name        string   `yaml:"name" json:"name"`
+		Description string   `yaml:"description" json:"description"`
+		Author      string   `yaml:"author" json:"author"`
+		Category    []string `yaml:"categories" json:"category"`
+	} `yaml:"info" json:"info"`
+	Rules          []Rule `yaml:"rules,omitempty" json:"rules,omitempty"`
+	PromptTemplate string `yaml:"prompt_template" json:"prompt_template"`
 }
 
 type Rule struct {

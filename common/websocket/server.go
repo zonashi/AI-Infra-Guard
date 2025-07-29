@@ -89,7 +89,6 @@ func RunWebServer(options *options.Options) {
 				fingerprints.PUT("/:name", HandleEditFingerprint)
 				fingerprints.DELETE("", HandleDeleteFingerprint)
 			}
-
 			// 漏洞库
 			vulnerabilities := knowledge.Group("/vulnerabilities")
 			{
@@ -99,16 +98,25 @@ func RunWebServer(options *options.Options) {
 				vulnerabilities.PUT("/:cve", HandleEditVulnerability)
 				vulnerabilities.DELETE("", HandleBatchDeleteVulnerabilities)
 			}
-
 			// 评测集
 			evaluations := knowledge.Group("/evaluations")
 			{
 				// 管理功能
-				evaluations.GET("", HandleListEvaluations)
 				evaluations.GET("/:name", HandleGetEvaluationDetail)
+				evaluations.GET("", HandleListEvaluations)
 				evaluations.POST("", HandleCreateEvaluation)
 				evaluations.PUT("/:name", HandleEditEvaluation)
 				evaluations.DELETE("", HandleDeleteEvaluation)
+			}
+			// MCP
+			mcp := knowledge.Group("/mcp")
+			{
+				// 管理功能
+				mcp.GET("names", GetMcpPluginList)
+				mcp.GET("", HandleList(MCPROOT, McpLoadFile))
+				mcp.POST("", HandleCreate(mcpReadAndSave))
+				mcp.PUT("/:name", HandleEdit(mcpUpdateFunc))
+				mcp.DELETE("", HandleDelete(mcpDeleteFunc))
 			}
 		}
 		appSecurity := v1.Group("/app")

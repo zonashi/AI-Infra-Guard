@@ -25,6 +25,11 @@ type CallbackReportInfo struct {
 	LowRisk    int `json:"low_risk"`
 }
 
+type CallbackErrorInfo struct {
+	Target string
+	Error  error
+}
+
 type FpInfos struct {
 	FpName string                 `json:"name"`
 	Vuls   []vulstruct.VersionVul `json:"vuls"`

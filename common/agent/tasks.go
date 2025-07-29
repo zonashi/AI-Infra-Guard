@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Tencent/AI-Infra-Guard/pkg/vulstruct"
+	iputil "github.com/projectdiscovery/utils/ip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -143,8 +144,47 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 		headers = append(headers, k+":"+v)
 	}
 	opts.Headers = headers
-	callbacks.StepStatusUpdateCallback(step01, statusId01, AgentStatusCompleted, "目标配置完成", fmt.Sprintf("目标数量: %d", len(reqScan.Target)))
-
+	callbacks.StepStatusUpdateCallback(step01, statusId01, AgentStatusCompleted, "初始化配置完成", "")
+	// 2. 判断需要扫描端口的target
+	targets = []string{}
+	var hosts []string
+	for _, target := range reqScan.Target {
+		if iputil.IsIP(target) {
+			hosts = append(hosts, target)
+		}
+		targets = append(targets, target)
+	}
+	if len(hosts) > 0 {
+		for _, host := range hosts {
+			statusNmap := uuid.NewString()
+			toolId := uuid.NewString()
+			callbacks.StepStatusUpdateCallback(step01, statusNmap, AgentStatusRunning, "正在自动识别端口", fmt.Sprintf("正在自动识别IP: %s", host))
+			callbacks.ToolUsedCallback(step01, statusNmap, "nmap", []Tool{
+				CreateTool(toolId, "nmap", SubTaskStatusDoing, "端口扫描", "nmap", "-T4", ""),
+			})
+			portScanResult, err := utils.NmapScan(host, "1-65535")
+			if err != nil {
+				return err
+			}
+			success := 0
+			for _, port := range portScanResult.Hosts {
+				address := port.Address.Addr
+				for _, ported := range port.Ports.PortList {
+					if ported.State.State == "open" {
+						targets = append(targets, fmt.Sprintf("%s:%d", address, ported.PortID))
+						success += 1
+						callbacks.ToolUseLogCallback(toolId, "nmap", step01, fmt.Sprintf("发现端口: %s:%d\n", address, ported.PortID))
+					}
+				}
+			}
+			callbacks.ToolUsedCallback(step01, statusNmap, "nmap", []Tool{
+				CreateTool(toolId, "nmap", SubTaskStatusDone, "端口扫描", "nmap", "-T4", fmt.Sprintf("端口数量: %d", success)),
+			})
+			callbacks.StepStatusUpdateCallback(step01, statusNmap, AgentStatusCompleted, host+" 端口探测完成", "")
+		}
+	}
+	callbacks.StepStatusUpdateCallback(step01, statusId01, AgentStatusCompleted, "目标配置完成", fmt.Sprintf("目标数量: %d", len(targets)))
+	opts.Target = targets
 	// 结果收集
 	scanResults := make([]runner.CallbackScanResult, 0)
 	mu := sync.Mutex{}
@@ -165,17 +205,19 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 				appFinger = fmt.Sprintf("WEB应用: %s ", v.Fingerprint)
 			}
 			if len(v.Vulnerabilities) > 0 {
-				log = fmt.Sprintf("URL:%s %s发现漏洞:%d", v.TargetURL, appFinger, len(v.Vulnerabilities))
+				log = fmt.Sprintf("URL:%s %s发现漏洞:%d\n", v.TargetURL, appFinger, len(v.Vulnerabilities))
 			} else {
-				log = fmt.Sprintf("URL:%s %s扫描完成,未发现漏洞", v.TargetURL, appFinger)
+				log = fmt.Sprintf("URL:%s %s扫描完成,未发现漏洞\n", v.TargetURL, appFinger)
 			}
 			callbacks.ToolUseLogCallback(toolId02, "ai_scanner", step02, log)
 			callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "发现结果", log)
-			//if len(v.Vulnerabilities) > 0 {
-			//	for _, vuln := range v.Vulnerabilities {
-			//		callbacks.StepStatusUpdateCallback(step02, statusId, AgentStatusCompleted, "发现漏洞", fmt.Sprintf("CVE:%s\n描述:%s\n详情:%s", vuln.CVEName, vuln.Summary, vuln.Details))
-			//	}
-			//}
+		//if len(v.Vulnerabilities) > 0 {
+		//	for _, vuln := range v.Vulnerabilities {
+		//		callbacks.StepStatusUpdateCallback(step02, statusId, AgentStatusCompleted, "发现漏洞", fmt.Sprintf("CVE:%s\n描述:%s\n详情:%s", vuln.CVEName, vuln.Summary, vuln.Details))
+		//	}
+		//}
+		case runner.CallbackErrorInfo:
+			callbacks.ToolUseLogCallback(toolId02, "ai_scanner", step02, fmt.Sprintf("执行错误: host:%s %s\n", v.Target, v.Error))
 		case runner.CallbackProcessInfo:
 		case runner.CallbackReportInfo:
 		case runner.Step01:
@@ -259,7 +301,9 @@ type ScanMcpRequest struct {
 		Token   string `json:"token"`
 		BaseUrl string `json:"base_url"`
 	} `json:"model"`
-	Language string `json:"language"`
+	Language string   `json:"language"`
+	Quick    bool     `json:"quick"`
+	Plugins  []string `json:"plugins,omitempty"`
 }
 
 type McpScanAgent struct {
@@ -268,33 +312,6 @@ type McpScanAgent struct {
 
 func (m *McpScanAgent) GetName() string {
 	return TaskTypeMcpScan
-}
-
-type tmpCallback struct {
-	Text []byte
-}
-type tmpWriter struct {
-	Callback func(data interface{})
-	Mux      sync.Mutex
-	cache    []byte
-}
-
-func (t *tmpWriter) Write(p []byte) (n int, err error) {
-	t.Mux.Lock()
-	defer t.Mux.Unlock()
-	t.cache = append(t.cache, p...)
-	if len(t.cache) > 100 {
-		t.Callback(tmpCallback{t.cache})
-		t.cache = []byte{}
-	}
-	return len(p), nil
-}
-
-func (t *tmpWriter) Finally() {
-	if len(t.cache) > 0 {
-		t.Callback(tmpCallback{t.cache})
-		t.cache = []byte{}
-	}
 }
 
 func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbacks TaskCallbacks) error {
@@ -310,6 +327,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	} else {
 		transport = "url"
 	}
+	quickMode := params.Quick
 
 	//0. 发送初始任务计划
 	taskTitles := []string{
@@ -334,24 +352,30 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	// 结果收集
 	readMe := ""
 
-	var moduleStatusId string
-	var moduleToolId string
+	var moduleStatusIdMap map[string]string = map[string]string{}
+	var moduleToolIdMap map[string]string = map[string]string{}
 	//var toolName string
 
 	processFunc := func(data interface{}) {
 		mu.Lock()
 		defer mu.Unlock()
 		switch v := data.(type) {
-		case tmpCallback:
-			//callbacks.ToolUseLogCallback(moduleToolId, toolName, step02, string(v.Text))
+		case mcp.CallbackWriteLog:
+			moduleName := v.ModuleName
+			moduleToolId := moduleToolIdMap[v.ModuleName]
+			callbacks.ToolUseLogCallback(moduleToolId, moduleName, step02, string(v.Text))
 		case mcp.McpModuleStart:
-			moduleStatusId = uuid.New().String()
-			moduleToolId = uuid.New().String()
+			moduleStatusId := uuid.New().String()
+			moduleToolId := uuid.New().String()
+			moduleStatusIdMap[v.ModuleName] = moduleStatusId
+			moduleToolIdMap[v.ModuleName] = moduleToolId
 			callbacks.StepStatusUpdateCallback(step02, moduleStatusId, AgentStatusRunning, "MCP安全插件扫描", "开始MCP安全扫描,模块名:"+v.ModuleName)
 			callbacks.ToolUsedCallback(step02, moduleStatusId, "开始扫描MCP安全扫描",
 				[]Tool{CreateTool(moduleToolId, v.ModuleName, ToolStatusDoing, "开始扫描MCP安全扫描", "开始扫描", v.ModuleName, "")})
 			//toolName = v.ModuleName
 		case mcp.McpModuleEnd:
+			moduleStatusId := moduleStatusIdMap[v.ModuleName]
+			moduleToolId := moduleToolIdMap[v.ModuleName]
 			callbacks.StepStatusUpdateCallback(step02, moduleStatusId, AgentStatusCompleted, "MCP安全插件扫描", "结束MCP安全扫描,模块名:"+v.ModuleName)
 			callbacks.ToolUsedCallback(step02, moduleStatusId, "MCP安全扫描完成",
 				[]Tool{CreateTool(moduleToolId, v.ModuleName, ToolStatusDone, "MCP安全扫描完成", "扫描完成", v.ModuleName, "")})
@@ -367,6 +391,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 			callbacks.ToolUseLogCallback(toolId, "info_collection", step02, readMe)
 		case mcp.Issue:
 			toolId := uuid.NewString()
+			moduleStatusId := uuid.NewString()
 			callbacks.ToolUsedCallback(step02, moduleStatusId, "漏洞发现",
 				[]Tool{CreateTool(toolId, toolId, ToolStatusDone, "漏洞发现", "漏洞发现", "模块名称:"+v.Title, "")})
 			issue := fmt.Sprintf("标题:%s\n描述:%s\n严重级别:%s\n建议:%s\n风险类型:%s\n", v.Title, v.Description, string(v.Level), v.Suggestion, v.RiskType)
@@ -376,15 +401,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 		}
 	}
 	callbacks.StepStatusUpdateCallback(step01, uuid.NewString(), AgentStatusCompleted, "配置AI模型", fmt.Sprintf("配置AI模型: %s", params.Model.Model))
-
-	writer1 := tmpWriter{
-		Callback: processFunc,
-		Mux:      sync.Mutex{},
-		cache:    make([]byte, 0),
-	}
 	logger := gologger.NewLogger()
-	logger.Logrus().SetOutput(&writer1)
-
 	modelConfig := models.NewOpenAI(params.Model.Token, params.Model.Model, params.Model.BaseUrl)
 	scanner := mcp.NewScanner(modelConfig, logger)
 	if params.Language == "" {
@@ -392,7 +409,10 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	}
 	scanner.SetLanguage(params.Language)
 	callbacks.StepStatusUpdateCallback(step01, uuid.NewString(), AgentStatusCompleted, "配置语言", params.Language)
-
+	err := scanner.RegisterPlugin(params.Plugins)
+	if err != nil {
+		return err
+	}
 	scanner.SetCallback(processFunc)
 
 	//4. 完成初始化
@@ -422,7 +442,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 		if err != nil || r == nil {
 			return err
 		}
-		results, err := scanner.ScanLink(ctx, r, false)
+		results, err := scanner.ScanLink(ctx, r, quickMode)
 		if err != nil {
 			return err
 		}
@@ -490,13 +510,12 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 			return fmt.Errorf("代码路径不存在或不是目录: %s", folder)
 		}
 		scanner.InputCodePath(folder)
-		results, err := scanner.ScanCode(ctx, false)
+		results, err := scanner.ScanCode(ctx, quickMode)
 		if err != nil {
 			return err
 		}
 		scanResults = results
 	}
-	writer1.Finally()
 	callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "A.I.G完成工作", "MCP安全扫描任务完成")
 
 	// 更新任务计划
@@ -516,7 +535,6 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	// 完成报告生成
 	completedTool03 := CreateTool(toolId03, "mcp_report_generator", ToolStatusDone, "MCP扫描报告生成完成", "生成", "扫描日志", "")
 	callbacks.ToolUsedCallback(step03, statusId03, "报告生成完成", []Tool{completedTool03})
-	//callbacks.ToolUseLogCallback(toolId03, "mcp_report_generator", step03, writer1.String())
 	callbacks.StepStatusUpdateCallback(step03, statusId03, AgentStatusCompleted, "A.I.G完成工作", "MCP扫描报告生成完成")
 
 	//7. 发送任务最终结果
