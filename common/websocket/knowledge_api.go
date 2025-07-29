@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"trpc.group/trpc-go/trpc-go/log"
 
 	"github.com/Tencent/AI-Infra-Guard/common/fingerprints/parser"
 	"github.com/Tencent/AI-Infra-Guard/pkg/vulstruct"
@@ -25,7 +26,6 @@ func isValidName(name string) bool {
 
 // 评测集数据结构定义
 type EvaluationDataItem struct {
-	Source string `json:"source,omitempty"`
 	Prompt string `json:"prompt"`
 }
 
@@ -34,13 +34,12 @@ type EvaluationDataset struct {
 	Description    string               `json:"description"`
 	DescriptionZh  string               `json:"description_zh,omitempty"`
 	Author         string               `json:"author,omitempty"`
-	Source         string               `json:"source,omitempty"`
+	Source         []string             `json:"source,omitempty"`
 	Count          int                  `json:"count"`
 	Tags           []string             `json:"tags,omitempty"`
 	Recommendation int                  `json:"recommendation,omitempty"`
 	Language       string               `json:"language,omitempty"`
 	Data           []EvaluationDataItem `json:"data"`
-	RawFields      json.RawMessage      `json:"-"` // 存储未解析的字段
 }
 
 // 获取指纹列表，支持分页和名字模糊
@@ -618,21 +617,24 @@ func HandleListEvaluations(c *gin.Context) {
 			content, readErr := os.ReadFile(path)
 			if readErr == nil {
 				var eval EvaluationDataset
-				if parseErr := json.Unmarshal(content, &eval); parseErr == nil {
-					// 转换为摘要格式（不包含data字段）
-					summary := EvaluationDataset{
-						Name:           eval.Name,
-						Description:    eval.Description,
-						Count:          eval.Count,
-						Tags:           eval.Tags,
-						Recommendation: eval.Recommendation,
-						Language:       eval.Language,
-					}
-					if detail == "true" {
-						summary.Data = eval.Data
-					}
-					allEvaluations = append(allEvaluations, summary)
+				err = json.Unmarshal(content, &eval)
+				if err != nil {
+					log.Error(path, err.Error())
+					return err
 				}
+				// 转换为摘要格式（不包含data字段）
+				summary := EvaluationDataset{
+					Name:           eval.Name,
+					Description:    eval.Description,
+					Count:          eval.Count,
+					Tags:           eval.Tags,
+					Recommendation: eval.Recommendation,
+					Language:       eval.Language,
+				}
+				if detail == "true" {
+					summary.Data = eval.Data
+				}
+				allEvaluations = append(allEvaluations, summary)
 			}
 		}
 		return nil
