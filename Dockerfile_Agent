@@ -27,7 +27,7 @@ WORKDIR /app/AIG-PromptSecurity
 RUN apt-get update --allow-releaseinfo-change && apt-get install -y --no-install-recommends --allow-unauthenticated git curl \
     && rm -rf /var/lib/apt/lists/* \
     && (command -v uv >/dev/null 2>&1 || pip install --no-cache-dir uv)
-RUN apt-get install -y nmap
+RUN apt-get update && apt-get install -y nmap
 COPY ./AIG-PromptSecurity /app/AIG-PromptSecurity/
 WORKDIR /app/AIG-PromptSecurity
 RUN uv pip install --system -r requirements.txt
