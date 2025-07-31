@@ -224,6 +224,7 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 	}
 	if task.Params != nil {
 		if modelID, exists := task.Params["model_id"]; exists {
+			log.Infof("找到模型ID: trace_id=%s, sessionId=%s, modelID=%v", traceID, sessionId, modelID)
 			switch v := modelID.(type) {
 			case string:
 				modelInfo, err := addModel(v)
@@ -231,9 +232,15 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 					return err
 				}
 				enhancedParams["model"] = modelInfo
-			case []string:
+			case []interface{}:
 				modelsList := make([]*database.ModelParams, len(v))
+				log.Infof("找到多个模型ID: trace_id=%s, sessionId=%s, modelID=%v", traceID, sessionId, v)
 				for _, vv := range v {
+					vv, ok := vv.(string)
+					if !ok {
+						log.Errorf("无效的模型ID类型: trace_id=%s, sessionId=%s, modelID=%v", traceID, sessionId, vv)
+						continue
+					}
 					modelInfo, err := addModel(vv)
 					if err != nil {
 						return err
@@ -861,9 +868,13 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 			if err == nil {
 				ModelName = model.ModelName
 			}
-		case []string:
+		case []interface{}:
 			modelStr := make([]string, 0)
 			for _, mid := range v {
+				mid, ok := mid.(string)
+				if !ok {
+					continue
+				}
 				model, err := tm.modelStore.GetModel(mid)
 				if err == nil {
 					modelStr = append(modelStr, model.ModelName)
