@@ -241,6 +241,8 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 					modelsList = append(modelsList, modelInfo)
 				}
 				enhancedParams["model"] = modelsList
+			default:
+				log.Errorf("无效的模型ID类型: trace_id=%s, sessionId=%s, modelID=%v", traceID, sessionId, v)
 			}
 		}
 		if evalModelStr, exists := task.Params["eval_model_id"]; exists {
