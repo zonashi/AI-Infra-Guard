@@ -2,14 +2,13 @@ package websocket
 
 import (
 	"embed"
-	"mime"
-	"path/filepath"
-
 	"github.com/Tencent/AI-Infra-Guard/common/middleware"
 	"github.com/Tencent/AI-Infra-Guard/common/trpc"
 	"github.com/Tencent/AI-Infra-Guard/internal/options"
 	"github.com/Tencent/AI-Infra-Guard/pkg/database"
 	"github.com/gin-gonic/gin"
+	"mime"
+	"path/filepath"
 	"trpc.group/trpc-go/trpc-go/log"
 )
 
@@ -111,12 +110,19 @@ func RunWebServer(options *options.Options) {
 			// MCP
 			mcp := knowledge.Group("/mcp")
 			{
-				// 管理功能
 				mcp.GET("names", GetMcpPluginList)
 				mcp.GET("", HandleList(MCPROOT, McpLoadFile))
 				mcp.POST("", HandleCreate(mcpReadAndSave))
-				mcp.PUT("/:name", HandleEdit(mcpUpdateFunc))
-				mcp.DELETE("", HandleDelete(mcpDeleteFunc))
+				mcp.PUT("/:id", HandleEdit(mcpUpdateFunc))
+				mcp.DELETE("/:id", HandleDelete(mcpDeleteFunc))
+			}
+			// Prompt Collections
+			collections := knowledge.Group("/prompt_collections")
+			{
+				collections.GET("", HandleList(PromptCollectionsRoot, promptCollectionLoadFile))
+				collections.POST("", HandleCreate(promptCollectionReadAndSave))
+				collections.PUT("/:id", HandleEdit(promptCollectionUpdateFunc))
+				collections.DELETE("", HandleDelete(promptCollectionDeleteFunc))
 			}
 		}
 		appSecurity := v1.Group("/app")
@@ -132,6 +138,10 @@ func RunWebServer(options *options.Options) {
 				// 获取任务详情接口
 				tasks.GET("/:sessionId", func(c *gin.Context) {
 					HandleGetTaskDetail(c, taskManager)
+				})
+				// 分享任务接口
+				tasks.POST("/share", func(c *gin.Context) {
+					HandleShare(c, taskManager)
 				})
 				// SSE接口
 				tasks.GET("/sse/:sessionId", func(c *gin.Context) {
@@ -235,10 +245,8 @@ func setupIdentityMiddleware() gin.HandlerFunc {
 		if username == "" {
 			username = "public_user"
 		}
-
 		// 存储到gin上下文
 		c.Set("username", username)
-
 		c.Next()
 	}
 }

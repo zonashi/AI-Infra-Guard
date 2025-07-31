@@ -1,0 +1,12 @@
+{
+  "code_exec": false,
+  "upload_file": false,
+  "product": "Claude",
+  "multi_modal": false,
+  "model_version": "Claude 4 Opus",
+  "prompt": "xxx",
+  "update_date": "2025-05-22",
+  "web_search": false,
+  "sec_policies": true,
+  "affiliation": "Anthropic"
+}

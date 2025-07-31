@@ -244,7 +244,7 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 
 	//5. 创建runner并执行扫描
 	callbacks.NewPlanStepCallback(step02, "执行AI基础设施扫描")
-	callbacks.StepStatusUpdateCallback(step02, statusId02, AgentStatusCompleted, "A.I.G正在工作", "正在创建扫描器实例...")
+	callbacks.StepStatusUpdateCallback(step02, statusId02, AgentStatusCompleted, "A.I.G正在工作", "正在扫描...")
 
 	//statusId03 := uuid.NewString()
 	callbacks.ToolUsedCallback(step02, statusId02, "执行扫描",

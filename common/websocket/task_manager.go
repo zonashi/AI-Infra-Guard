@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -15,8 +16,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 
 	"github.com/Tencent/AI-Infra-Guard/common/agent"
 
@@ -91,6 +90,7 @@ func (tm *TaskManager) AddTask(req *TaskCreateRequest, traceID string) error {
 		Status:         TaskStatusDoing,
 		AssignedAgent:  "", // 预存时为空
 		CountryIsoCode: req.CountryIsoCode,
+		Share:          true,
 	}
 
 	err = tm.taskStore.CreateSession(session)
@@ -193,54 +193,66 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 	}
 
 	// 5. 处理params中的modelid，获取模型信息
-	enhancedParams := task.Params
+	enhancedParams := make(map[string]interface{})
+	for k, v := range task.Params {
+		enhancedParams[k] = v
+	}
+	addModel := func(modelId string) (*database.ModelParams, error) {
+		model, err := tm.modelStore.GetModel(modelId)
+		if err != nil {
+			// 检查是否是记录不存在的错误
+			if err.Error() == "record not found" {
+				log.Errorf("模型不存在: trace_id=%s, sessionId=%s, modelID=%s", traceID, sessionId, modelId)
+				return nil, fmt.Errorf("模型ID '%s' 不存在，请检查模型配置", modelId)
+			}
+			log.Errorf("获取模型信息失败: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelId, err)
+			return nil, fmt.Errorf("获取模型信息失败: %v", err)
+		}
+		// 测试模型是否有效
+		ai := models.NewOpenAI(model.Token, model.ModelName, model.BaseURL)
+		err = ai.Vaild(context.Background())
+		if err != nil {
+			log.Errorf("模型无效: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelId, err)
+			return nil, fmt.Errorf("模型无效: %v", err)
+		}
+		p := database.ModelParams{
+			Model:   model.ModelName,
+			Token:   model.Token,
+			BaseUrl: model.BaseURL,
+		}
+		return &p, nil
+	}
 	if task.Params != nil {
 		if modelID, exists := task.Params["model_id"]; exists {
-			if modelIDStr, ok := modelID.(string); ok && strings.TrimSpace(modelIDStr) != "" {
-				log.Infof("处理模型ID: trace_id=%s, sessionId=%s, modelID=%s", traceID, sessionId, modelIDStr)
-
-				// 从数据库获取模型信息
-				model, err := tm.modelStore.GetModel(modelIDStr)
+			switch v := modelID.(type) {
+			case string:
+				modelInfo, err := addModel(v)
 				if err != nil {
-					// 检查是否是记录不存在的错误
-					if err.Error() == "record not found" {
-						log.Errorf("模型不存在: trace_id=%s, sessionId=%s, modelID=%s", traceID, sessionId, modelIDStr)
-						return fmt.Errorf("模型ID '%s' 不存在，请检查模型配置", modelIDStr)
-					}
-					log.Errorf("获取模型信息失败: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelIDStr, err)
-					return fmt.Errorf("获取模型信息失败: %v", err)
-				}
-				// 测试模型是否有效
-				ai := models.NewOpenAI(model.Token, model.ModelName, model.BaseURL)
-				err = ai.Vaild(context.Background())
-				if err != nil {
-					log.Errorf("模型无效: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelIDStr, err)
-					return fmt.Errorf("模型无效: %v", err)
-				}
-
-				// 构造模型信息
-				modelInfo := map[string]interface{}{
-					"model":    model.ModelName,
-					"token":    model.Token,
-					"base_url": model.BaseURL,
-				}
-
-				// 创建新的params，包含模型信息
-				enhancedParams = make(map[string]interface{})
-				for k, v := range task.Params {
-					enhancedParams[k] = v
+					return err
 				}
 				enhancedParams["model"] = modelInfo
-
-				log.Infof("模型信息已添加到params: trace_id=%s, sessionId=%s, modelID=%s", traceID, sessionId, modelIDStr)
-			} else {
-				log.Debugf("模型ID为空，跳过模型信息查询: trace_id=%s, sessionId=%s", traceID, sessionId)
+			case []string:
+				modelsList := make([]*database.ModelParams, len(v))
+				for _, vv := range v {
+					modelInfo, err := addModel(vv)
+					if err != nil {
+						return err
+					}
+					modelsList = append(modelsList, modelInfo)
+				}
+				enhancedParams["model"] = modelsList
 			}
-		} else {
-			log.Debugf("params中无model_id字段，跳过模型信息查询: trace_id=%s, sessionId=%s", traceID, sessionId)
 		}
-	} else {
-		log.Debugf("params为空，跳过模型信息查询: trace_id=%s, sessionId=%s", traceID, sessionId)
+		if evalModelStr, exists := task.Params["eval_model_id"]; exists {
+			evalModelId, ok := evalModelStr.(string)
+			if ok {
+				evalModelInfo, err := addModel(evalModelId)
+				if err != nil {
+					return err
+				}
+				enhancedParams["eval_model"] = evalModelInfo
+			}
+		}
 	}
 
 	// 6. 构造任务分配消息
@@ -841,12 +853,21 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 	ret := ""
 	var ModelName = ""
 	if modelID, exists := req.Params["model_id"]; exists {
-		if modelIDStr, ok := modelID.(string); ok && strings.TrimSpace(modelIDStr) != "" {
-			// 从数据库获取模型信息
-			model, err := tm.modelStore.GetModel(modelIDStr)
+		switch v := modelID.(type) {
+		case string:
+			model, err := tm.modelStore.GetModel(v)
 			if err == nil {
 				ModelName = model.ModelName
 			}
+		case []string:
+			modelStr := make([]string, 0)
+			for _, mid := range v {
+				model, err := tm.modelStore.GetModel(mid)
+				if err == nil {
+					modelStr = append(modelStr, model.ModelName)
+				}
+			}
+			ModelName = strings.Join(modelStr, ",")
 		}
 	}
 	// 1. AI基础 ip/域名 ，文件形式：取第一行等xx个
@@ -876,7 +897,7 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 	case agent.TaskTypeModelJailbreak:
 		ret = "一键越狱任务 - " + fmt.Sprintf("模型:%s, prompt:%s", ModelName, req.Content)
 	case agent.TaskTypeModelRedteamReport:
-		ret = ModelName + "模型评测任务"
+		ret = ModelName + " 模型评测任务"
 	default:
 		ret = "其他任务 - " + req.Content
 	}
@@ -942,10 +963,10 @@ func (tm *TaskManager) GetTaskDetail(sessionId string, username string, traceID 
 	}
 
 	// 验证用户权限（只有任务创建者才能查看）
-	//if session.Username != username {
-	//	log.Errorf("无权限访问任务详情: trace_id=%s, sessionId=%s, username=%s, owner=%s", traceID, sessionId, username, session.Username)
-	//	return nil, fmt.Errorf("无权限查看此任务")
-	//}
+	if !session.Share && session.Username != username {
+		log.Errorf("无权限访问任务详情: trace_id=%s, sessionId=%s, username=%s, owner=%s", traceID, sessionId, username, session.Username)
+		return nil, fmt.Errorf("无权限查看此任务")
+	}
 
 	// 获取任务的所有消息
 	messages, err := tm.taskStore.GetSessionMessages(sessionId)
@@ -1010,6 +1031,9 @@ func (tm *TaskManager) GetTaskDetail(sessionId string, username string, traceID 
 		"taskType":       session.TaskType,
 		"attachments":    attachments,
 		"messages":       messageList,
+	}
+	if session.Username != username {
+		delete(detail, "attachments")
 	}
 
 	log.Infof("获取任务详情成功: trace_id=%s, sessionId=%s, username=%s", traceID, sessionId, username)

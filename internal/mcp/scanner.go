@@ -544,7 +544,9 @@ func (t *tmpWriter) Write(p []byte) (n int, err error) {
 	for _, word := range p {
 		t.cache = append(t.cache, word)
 		if word == '\n' {
-			t.Callback(CallbackWriteLog{t.cache, t.ModuleName})
+			if t.Callback != nil {
+				t.Callback(CallbackWriteLog{t.cache, t.ModuleName})
+			}
 			t.cache = []byte{}
 		}
 	}
@@ -553,7 +555,9 @@ func (t *tmpWriter) Write(p []byte) (n int, err error) {
 
 func (t *tmpWriter) Finally() {
 	if len(t.cache) > 0 {
-		t.Callback(CallbackWriteLog{t.cache, t.ModuleName})
+		if t.Callback != nil {
+			t.Callback(CallbackWriteLog{t.cache, t.ModuleName})
+		}
 		t.cache = []byte{}
 	}
 }
@@ -815,11 +819,18 @@ func (s *Scanner) ScanLink(ctx context.Context, r *mcp.InitializeResult, paralle
 		s.logger.Warningf("信息收集插件加载失败: %v", err)
 	} else {
 		s.logger.Infoln("信息收集中...")
+		newLogger := gologger.NewLogger()
+		tmpW := &tmpWriter{
+			Callback:   s.callback,
+			ModuleName: "信息收集",
+		}
+		newLogger.Logrus().SetOutput(io.MultiWriter(s.logger.Logrus().Out, tmpW))
+
 		issues, err := runDynamicAnalysis(ctx, p, &McpPluginConfig{
 			Client:       s.client,
 			AIModel:      s.aiModel,
 			Language:     s.language,
-			Logger:       s.logger,
+			Logger:       newLogger,
 			McpStructure: mcpStructure,
 		})
 		if err != nil {
@@ -850,13 +861,19 @@ func (s *Scanner) ScanLink(ctx context.Context, r *mcp.InitializeResult, paralle
 		default:
 		}
 		logger.Infof("运行插件 %s", plugin.Info.Name)
+		newLogger := gologger.NewLogger()
+		tmpW := &tmpWriter{
+			Callback:   s.callback,
+			ModuleName: "信息收集",
+		}
+		newLogger.Logrus().SetOutput(io.MultiWriter(logger.Logrus().Out, tmpW))
 		startTime := time.Now()
 		config := McpPluginConfig{
 			Client:       s.client,
 			McpStructure: mcpStructure,
 			AIModel:      s.aiModel,
 			Language:     s.language,
-			Logger:       logger,
+			Logger:       newLogger,
 		}
 		if s.callback != nil {
 			lock.Lock()

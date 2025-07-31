@@ -36,6 +36,7 @@ type Session struct {
 	// 关联关系
 	User     User          `gorm:"foreignKey:Username" json:"user"`
 	Messages []TaskMessage `gorm:"foreignKey:SessionID" json:"messages"` // 直接关联到Session
+	Share    bool          `gorm:"column:share;not null;default:false" json:"share"`
 }
 
 // TaskMessage 任务消息表（存储所有类型的事件消息）
@@ -100,6 +101,11 @@ func (s *TaskStore) GetSession(id string) (*Session, error) {
 		return nil, err
 	}
 	return &session, nil
+}
+
+// SetShare 设置会话共享
+func (s *TaskStore) SetShare(sessionID string, share bool) error {
+	return s.db.Model(&Session{}).Where("id = ?", sessionID).Update("share", share).Error
 }
 
 // UpdateSessionStatus 更新会话状态

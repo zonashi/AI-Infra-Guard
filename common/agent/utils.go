@@ -132,3 +132,40 @@ func UploadFile(server, filePath string) (*UploadFileResponse, error) {
 
 	return &uploadResp, nil
 }
+
+func GetEvaluationsDetail(server, name string) ([]byte, error) {
+	path := "/api/v1/knowledge/evaluations/" + name
+	// 创建 HTTP 请求
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://%s%s", server, path), nil)
+	if err != nil {
+		return nil, fmt.Errorf("创建请求失败: %v", err)
+	}
+
+	// 发送请求
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("发送请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("读取响应失败: %v", err)
+	}
+
+	// 检查 HTTP 状态码
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("上传失败，HTTP 状态码：%d content:%s", resp.StatusCode, string(respBody))
+	}
+
+	var msg struct {
+		Data json.RawMessage `json:"data"`
+	}
+	err = json.Unmarshal(respBody, &msg)
+	if err != nil {
+		return nil, fmt.Errorf("解析响应 JSON 失败: %v", err)
+	}
+	return msg.Data, nil
+}

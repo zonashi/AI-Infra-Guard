@@ -5,7 +5,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/Tencent/AI-Infra-Guard/pkg/database"
@@ -456,61 +455,70 @@ func HandleGetTaskList(c *gin.Context, tm *TaskManager) {
 	})
 }
 
-// HandleSearchTasks 搜索任务接口（简化版本，只使用q参数）
-func HandleSearchTasks(c *gin.Context, tm *TaskManager) {
-	traceID := getTraceID(c)
-	// 从中间件获取用户名
-	username := c.GetString("username")
-
-	log.Infof("开始搜索任务: trace_id=%s, username=%s", traceID, username)
-
-	// 解析简化的搜索参数
-	var searchParams database.SimpleSearchParams
-
-	// 从查询字符串获取搜索关键词
-	searchParams.Query = c.Query("q")
-
-	// 解析分页参数
-	if page := c.Query("page"); page != "" {
-		if pageInt, err := strconv.Atoi(page); err == nil && pageInt > 0 {
-			searchParams.Page = pageInt
-		} else {
-			searchParams.Page = 1
-		}
-	} else {
-		searchParams.Page = 1
+// HandleShare 分享任务
+func HandleShare(c *gin.Context, tm *TaskManager) {
+	var params struct {
+		Session string `json:"sessionId" binding:"required"`
 	}
-
-	if pageSize := c.Query("page_size"); pageSize != "" {
-		if pageSizeInt, err := strconv.Atoi(pageSize); err == nil && pageSizeInt > 0 {
-			searchParams.PageSize = pageSizeInt
-		} else {
-			searchParams.PageSize = 10
-		}
-	} else {
-		searchParams.PageSize = 10
-	}
-
-	log.Debugf("搜索参数: trace_id=%s, username=%s, query=%s, page=%d, pageSize=%d", traceID, username, searchParams.Query, searchParams.Page, searchParams.PageSize)
-
-	// 调用TaskManager进行简化搜索
-	result, err := tm.SearchUserTasksSimple(username, searchParams, traceID)
-	if err != nil {
-		log.Errorf("搜索任务失败: trace_id=%s, username=%s, error=%v", traceID, username, err)
-		c.JSON(http.StatusOK, gin.H{
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  1,
-			"message": "搜索任务失败: " + err.Error(),
+			"message": "参数错误: " + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	if params.Session == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  1,
+			"message": "sessionId不能为空",
 			"data":    nil,
 		})
 		return
 	}
 
-	log.Infof("搜索任务成功: trace_id=%s, username=%s", traceID, username)
+	// 验证sessionId格式
+	if !isValidSessionID(params.Session) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  1,
+			"message": "无效的sessionId格式",
+			"data":    nil,
+		})
+		return
+	}
 
+	// 获取用户信息
+	username := c.GetString("username")
+	session, err := tm.taskStore.GetSession(params.Session)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  1,
+			"message": "获取任务详情失败: " + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	if username != session.Username {
+		c.JSON(http.StatusForbidden, gin.H{
+			"status":  1,
+			"message": "无权限访问",
+			"data":    nil,
+		})
+		return
+	}
+	err = tm.taskStore.SetShare(params.Session, true)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  1,
+			"message": "设置分享失败: " + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
-		"message": "搜索任务成功",
-		"data":    result,
+		"message": "设置分享成功",
+		"data":    nil,
 	})
 }
 

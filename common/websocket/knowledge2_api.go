@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Tencent/AI-Infra-Guard/internal/mcp"
@@ -47,24 +48,23 @@ func HandleList(root string, loadFile func(filePath string) (interface{}, error)
 }
 func HandleCreate(readAndSave func(content string) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		type UploadRequest struct {
-			FileContent string `json:"file_content" binding:"required"`
+		var request struct {
+			Content string `json:"content" binding:"required"`
 		}
-		var eval UploadRequest
-		if err := c.ShouldBindJSON(&eval); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "参数解析失败"})
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "content parameter is required"})
 			return
 		}
-		if err := readAndSave(eval.FileContent); err != nil {
+		if err := readAndSave(request.Content); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "保存失败: " + err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"status": 0, "message": "创建评测集成功"})
+		c.JSON(http.StatusOK, gin.H{"status": 0, "message": "创建成功"})
 	}
 }
 
 // HandleEdit 返回处理编辑请求的HandlerFunc
-func HandleEdit(updateFunc func(name string, content string) error) gin.HandlerFunc {
+func HandleEdit(updateFunc func(id string, content string) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		name := c.Param("name")
 		if name == "" {
@@ -72,16 +72,15 @@ func HandleEdit(updateFunc func(name string, content string) error) gin.HandlerF
 			return
 		}
 
-		type EditRequest struct {
-			FileContent string `json:"file_content" binding:"required"`
+		var request struct {
+			Content string `json:"content" binding:"required"`
 		}
-		var req EditRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "参数解析失败"})
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "content parameter is required"})
 			return
 		}
 
-		if err := updateFunc(name, req.FileContent); err != nil {
+		if err := updateFunc(c.Param("id"), request.Content); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": 1, "message": "更新失败: " + err.Error()})
 			return
 		}
@@ -91,9 +90,9 @@ func HandleEdit(updateFunc func(name string, content string) error) gin.HandlerF
 }
 
 // HandleDelete 返回处理删除请求的HandlerFunc
-func HandleDelete(deleteFunc func(name string) error) gin.HandlerFunc {
+func HandleDelete(deleteFunc func(id string) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		name := c.Param("name")
+		name := c.Param("id")
 		if name == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "名称不能为空"})
 			return
@@ -108,6 +107,7 @@ func HandleDelete(deleteFunc func(name string) error) gin.HandlerFunc {
 	}
 }
 
+// mcp prompt管理
 const MCPROOT = "data/mcp"
 
 func McpLoadFile(filePath string) (interface{}, error) {
@@ -117,82 +117,176 @@ func McpLoadFile(filePath string) (interface{}, error) {
 	if !strings.HasSuffix(filePath, ".yaml") {
 		return nil, nil
 	}
-	return mcp.NewYAMLPlugin(filePath)
+	var ret struct {
+		mcp.PluginConfig `yaml:",inline"`
+		RawData          string `yaml:"raw_data"`
+	}
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var config mcp.PluginConfig
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, err
+	}
+	ret.RawData = string(data)
+	ret.PluginConfig = config
+	return ret, nil
 }
 
 func mcpReadAndSave(content string) error {
+	// 确保目录存在
+	if err := os.MkdirAll(MCPROOT, 0755); err != nil {
+		return fmt.Errorf("创建目录失败: %w", err)
+	}
+
+	// 解析YAML验证格式
 	var config mcp.PluginConfig
 	err := yaml.Unmarshal([]byte(content), &config)
 	if err != nil {
-		return err
+		return fmt.Errorf("YAML解析失败: %w", err)
 	}
-	if config.Info.ID == "" {
-		return errors.New("config info id is empty")
+
+	// 获取ID
+	id := config.Info.ID
+	if id == "" {
+		return errors.New("缺少info.id字段")
 	}
-	if strings.Contains(config.Info.ID, "..") {
-		return errors.New("config info id contains ..")
+
+	// 安全检查
+	if strings.Contains(id, "..") || strings.ContainsAny(id, "/\\<>:\"|?*") {
+		return errors.New("无效的文件名")
 	}
-	if config.Info.Name == "" {
-		return errors.New("config info name is empty")
-	}
-	if config.PromptTemplate == "" {
-		return errors.New("config prompt_template is empty")
-	}
-	// save
-	filename := filepath.Join(MCPROOT, config.Info.ID+".yaml")
-	if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
-		return err
-	}
-	return nil
+
+	filename := filepath.Join(MCPROOT, id+".yaml")
+	return os.WriteFile(filename, []byte(content), 0644)
 }
 
-func mcpUpdateFunc(name string, content string) error {
-	// 解析新的配置
+func mcpUpdateFunc(id string, content string) error {
+	// 解析YAML验证内容格式
 	var config mcp.PluginConfig
 	if err := yaml.Unmarshal([]byte(content), &config); err != nil {
-		return err
-	}
-	if config.Info.ID == "" {
-		return errors.New("config info id is empty")
-	}
-	if strings.Contains(config.Info.ID, "..") {
-		return errors.New("config info id contains ..")
-	}
-	if config.Info.Name == "" {
-		return errors.New("config info name is empty")
-	}
-	if config.PromptTemplate == "" {
-		return errors.New("config prompt_template is empty")
+		return fmt.Errorf("YAML解析失败: %w", err)
 	}
 
-	// 构建文件路径
-	oldPath := filepath.Join(MCPROOT, name+".yaml")
-	newPath := filepath.Join(MCPROOT, config.Info.ID+".yaml")
+	// 安全检查文件名
+	if strings.Contains(id, "..") || strings.ContainsAny(id, "/\\<>:\"|?*") {
+		return errors.New("无效的文件名")
+	}
 
-	// 检查原文件是否存在
-	if _, err := os.Stat(oldPath); os.IsNotExist(err) {
-		return errors.New("original config file does not exist")
-	}
-	// 写入新内容
-	if err := os.WriteFile(newPath, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write config file: %w", err)
-	}
-	return nil
+	// 使用提供的name作为文件名，允许更新文件而不强制更改文件名
+	filePath := filepath.Join(MCPROOT, id+".yaml")
+	return os.WriteFile(filePath, []byte(content), 0644)
 }
 
-func mcpDeleteFunc(name string) error {
-	// 构建文件路径
-	filePath := filepath.Join(MCPROOT, name+".yaml")
+func mcpDeleteFunc(id string) error {
+	// 安全检查文件名
+	if strings.Contains(id, "..") || strings.ContainsAny(id, "/\\<>:\"|?*") {
+		return errors.New("无效的文件名")
+	}
+
+	filePath := filepath.Join(MCPROOT, id+".yaml")
 
 	// 检查文件是否存在
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return errors.New("config file does not exist")
+		return errors.New("文件不存在")
 	}
 
-	// 删除文件
-	if err := os.Remove(filePath); err != nil {
-		return fmt.Errorf("failed to delete config file: %w", err)
+	return os.Remove(filePath)
+}
+
+// AI应用透视镜管理
+const PromptCollectionsRoot = "data/prompt_collections"
+
+type PromptCollection struct {
+	CodeExec     bool   `json:"code_exec"`
+	UploadFile   bool   `json:"upload_file"`
+	Product      string `json:"product"`
+	MultiModal   bool   `json:"multi_modal"`
+	ModelVersion string `json:"model_version"`
+	Prompt       string `json:"prompt"`
+	UpdateDate   string `json:"update_date"`
+	WebSearch    bool   `json:"web_search"`
+	SecPolicies  bool   `json:"sec_policies"`
+	Affiliation  string `json:"affiliation"`
+	Id           string `json:"id"`
+}
+
+func promptCollectionLoadFile(filePath string) (interface{}, error) {
+	if filePath == "" {
+		return nil, nil
+	}
+	if !strings.HasSuffix(filePath, ".json") {
+		return nil, nil
+	}
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	var config PromptCollection
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		return nil, err
+	}
+	base := filepath.Base(filePath)
+	config.Id = strings.Split(base, ".")[0]
+	return config, nil
+}
+
+func promptCollectionReadAndSave(content string) error {
+	// 验证JSON格式
+	var collection map[string]interface{}
+	err := json.Unmarshal([]byte(content), &collection)
+	if err != nil {
+		return fmt.Errorf("JSON解析失败: %w", err)
 	}
 
-	return nil
+	// 获取ID作为文件名
+	id, ok := collection["id"].(string)
+	if !ok || id == "" {
+		return errors.New("缺少id字段")
+	}
+
+	// 安全检查
+	if strings.Contains(id, "..") || strings.ContainsAny(id, "/\\<>:\"|?*") {
+		return errors.New("无效的文件名")
+	}
+
+	filename := filepath.Join(PromptCollectionsRoot, id+".json")
+	return os.WriteFile(filename, []byte(content), 0644)
+}
+
+func promptCollectionUpdateFunc(id string, content string) error {
+	// 验证JSON格式
+	var collection map[string]interface{}
+	err := json.Unmarshal([]byte(content), &collection)
+	if err != nil {
+		return fmt.Errorf("JSON格式无效: %w", err)
+	}
+
+	// 安全检查文件名
+	if strings.Contains(id, "..") || strings.ContainsAny(id, "/\\<>:\"|?*") {
+		return errors.New("无效的文件名")
+	}
+
+	filename := filepath.Join(PromptCollectionsRoot, id+".json")
+	return os.WriteFile(filename, []byte(content), 0644)
+}
+
+func promptCollectionDeleteFunc(id string) error {
+	// 安全检查文件名
+	if strings.Contains(id, "..") || strings.ContainsAny(id, "/\\<>:\"|?*") {
+		return errors.New("无效的文件名")
+	}
+
+	filePath := filepath.Join(PromptCollectionsRoot, id+".json")
+
+	// 检查文件是否存在
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return errors.New("文件不存在")
+	}
+
+	return os.Remove(filePath)
 }

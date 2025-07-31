@@ -454,10 +454,12 @@ func (r *Runner) RunEnumeration() {
 				r.rateLimiter.Take()
 				err := r.runHostRequest(target)
 				if err != nil {
-					r.callback(CallbackErrorInfo{
-						Target: target,
-						Error:  err,
-					})
+					if r.Options.Callback != nil {
+						r.Options.Callback(CallbackErrorInfo{
+							Target: target,
+							Error:  err,
+						})
+					}
 				}
 				atomic.AddUint64(&numTarget, 1)
 				r.callbackProcess(int(atomic.LoadUint64(&numTarget)), r.total)
@@ -468,10 +470,12 @@ func (r *Runner) RunEnumeration() {
 				r.rateLimiter.Take()
 				err := r.runDomainRequest(target)
 				if err != nil {
-					r.callback(CallbackErrorInfo{
-						Target: target,
-						Error:  err,
-					})
+					if r.Options.Callback != nil {
+						r.Options.Callback(CallbackErrorInfo{
+							Target: target,
+							Error:  err,
+						})
+					}
 				}
 				atomic.AddUint64(&numTarget, 1)
 				r.callbackProcess(int(atomic.LoadUint64(&numTarget)), r.total)

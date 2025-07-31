@@ -7,6 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type ModelParams struct {
+	BaseUrl string `json:"base_url"`
+	Token   string `json:"token"`
+	Model   string `json:"model"`
+}
+
 // Model 模型表
 type Model struct {
 	ModelID   string `gorm:"primaryKey;column:model_id" json:"model_id"`   // 模型ID
