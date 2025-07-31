@@ -233,7 +233,7 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 				}
 				enhancedParams["model"] = modelInfo
 			case []interface{}:
-				modelsList := make([]*database.ModelParams, len(v))
+				modelsList := make([]*database.ModelParams, 0)
 				log.Infof("找到多个模型ID: trace_id=%s, sessionId=%s, modelID=%v", traceID, sessionId, v)
 				for _, vv := range v {
 					vv, ok := vv.(string)

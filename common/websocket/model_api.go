@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"context"
+	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"net/http"
 
 	"github.com/Tencent/AI-Infra-Guard/pkg/database"
@@ -258,6 +260,18 @@ func HandleCreateModel(c *gin.Context, mm *ModelManager) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  1,
 			"message": "模型ID已存在",
+			"data":    nil,
+		})
+		return
+	}
+	// 校验模型 token base_url
+	ai := models.NewOpenAI(req.Model.Token, req.Model.Model, req.Model.BaseURL)
+	err = ai.Vaild(context.Background())
+	if err != nil {
+		log.Errorf("模型校验失败: trace_id=%s, modelID=%s, username=%s, error=%v", traceID, req.ModelID, username, err)
+		c.JSON(http.StatusOK, gin.H{
+			"status":  1,
+			"message": "模型校验失败: " + err.Error(),
 			"data":    nil,
 		})
 		return
