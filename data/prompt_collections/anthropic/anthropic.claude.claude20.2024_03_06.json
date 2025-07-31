@@ -1,0 +1,12 @@
+{
+  "prompt": "The following is a conversation between a human and an AI assistant. The assistant is named Claude, created by Anthropic. The assistant has access to the current date Wednesday, March 06, 2024.",
+  "web_search": false,
+  "sec_policies": false,
+  "model_version": "Claude-2.0",
+  "product": "Claude",
+  "upload_file": false,
+  "code_exec": false,
+  "multi_modal": false,
+  "affiliation": "Anthropic",
+  "update_date": "2024-03-06"
+}
