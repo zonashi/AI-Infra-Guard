@@ -7,7 +7,6 @@ import (
 	"fmt"
 	utils2 "github.com/Tencent/AI-Infra-Guard/common/utils"
 	"github.com/mark3labs/mcp-go/mcp"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -587,7 +586,7 @@ func (s *Scanner) ScanCode(ctx context.Context, parallel bool) (*McpResult, erro
 			Callback:   s.callback,
 			ModuleName: "信息收集",
 		}
-		newLogger.Logrus().SetOutput(io.MultiWriter(logger.Logrus().Out, tmpW))
+		newLogger.Logrus().SetOutput(tmpW)
 
 		result, err := s.runCheckCode(ctx, infoPlugin, &McpPluginConfig{
 			Client:   s.client,
@@ -638,7 +637,7 @@ func (s *Scanner) ScanCode(ctx context.Context, parallel bool) (*McpResult, erro
 			Callback:   s.callback,
 			ModuleName: plugin.Info.Name,
 		}
-		newLogger.Logrus().SetOutput(io.MultiWriter(logger.Logrus().Out, tmpW))
+		newLogger.Logrus().SetOutput(tmpW)
 
 		s.aiModel.ResetToken()
 		startTime := time.Now()
@@ -824,7 +823,7 @@ func (s *Scanner) ScanLink(ctx context.Context, r *mcp.InitializeResult, paralle
 			Callback:   s.callback,
 			ModuleName: "信息收集",
 		}
-		newLogger.Logrus().SetOutput(io.MultiWriter(s.logger.Logrus().Out, tmpW))
+		newLogger.Logrus().SetOutput(tmpW)
 
 		issues, err := runDynamicAnalysis(ctx, p, &McpPluginConfig{
 			Client:       s.client,
@@ -866,7 +865,7 @@ func (s *Scanner) ScanLink(ctx context.Context, r *mcp.InitializeResult, paralle
 			Callback:   s.callback,
 			ModuleName: "信息收集",
 		}
-		newLogger.Logrus().SetOutput(io.MultiWriter(logger.Logrus().Out, tmpW))
+		newLogger.Logrus().SetOutput(tmpW)
 		startTime := time.Now()
 		config := McpPluginConfig{
 			Client:       s.client,
