@@ -41,7 +41,7 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 			DataFile   []string `json:"dataFile"`
 			NumPrompts int      `json:"numPrompts"`
 			RandomSeed int      `json:"randomSeed"`
-		} `json:"datasets"`
+		} `json:"dataset"`
 	}
 	var param params
 	if err := json.Unmarshal(request.Params, &param); err != nil {
@@ -91,6 +91,10 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		}
 		gologger.Infof("文件下载成功: %s", fileName2)
 		argv = append(argv, scenarios)
+	}
+
+	if len(param.Datasets.DataFile) == 0 {
+		param.Datasets.DataFile = []string{"JailbreakPrompts-Top"}
 	}
 
 	for _, dataName := range param.Datasets.DataFile {
