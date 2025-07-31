@@ -51,7 +51,7 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		param.Datasets.RandomSeed = 42
 	}
 	if param.Datasets.NumPrompts == 0 {
-		param.Datasets.NumPrompts = 20
+		param.Datasets.NumPrompts = -1
 	}
 	if request.Language == "" {
 		request.Language = "zh"
@@ -99,7 +99,8 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 
 	for _, dataName := range param.Datasets.DataFile {
 		tempDir := os.TempDir()
-		fileName := filepath.Join(tempDir, fmt.Sprintf("tmp-%d.json", time.Now().UnixMicro()))
+		fileName := filepath.Join(tempDir, fmt.Sprintf("%s-%d.json", dataName, time.Now().UnixMicro()))
+		fileName = strings.Replace(fileName, " ", "_", -1)
 		data, err := GetEvaluationsDetail(m.Server, dataName)
 		if err != nil {
 			gologger.Errorf("获取评测数据失败: %v", err)

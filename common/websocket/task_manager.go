@@ -349,6 +349,15 @@ func (tm *TaskManager) HandleAgentEvent(sessionId string, eventType string, even
 				log.Debugf("动作日志: sessionId=%s, actionId=%s", sessionId, actionLogEvent.ActionID)
 			}
 		}
+	case "error":
+		log.Errorf("错误事件: sessionId=%s %v", sessionId, event)
+		updates := map[string]interface{}{
+			"status": "error",
+		}
+		err := tm.taskStore.UpdateSession(sessionId, updates)
+		if err != nil {
+			log.Errorf("更新任务失败: sessionId=%s, error=%v", sessionId, err)
+		}
 	case "resultUpdate":
 		if convertedEvent, err := convertToStruct(event, &ResultUpdateEvent{}); err == nil {
 			if _, ok := convertedEvent.(*ResultUpdateEvent); ok {

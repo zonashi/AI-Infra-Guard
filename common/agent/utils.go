@@ -32,11 +32,6 @@ func DownloadFile(server, sessionId, uri, path string) error {
 		dd, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("下载失败，HTTP 状态码：%d content:%s", resp.StatusCode, string(dd))
 	}
-	contentType := resp.Header.Get("Content-Type")
-
-	if contentType == "application/json" {
-		return fmt.Errorf("下载失败，文件类型错误：%s", contentType)
-	}
 
 	// 创建文件
 	file, err := os.Create(path)
