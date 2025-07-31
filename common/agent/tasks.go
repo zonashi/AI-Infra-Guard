@@ -160,9 +160,9 @@ func (t *AIInfraScanAgent) Execute(ctx context.Context, request TaskRequest, cal
 			toolId := uuid.NewString()
 			callbacks.StepStatusUpdateCallback(step01, statusNmap, AgentStatusRunning, "正在自动识别端口", fmt.Sprintf("正在自动识别IP: %s", host))
 			callbacks.ToolUsedCallback(step01, statusNmap, "nmap", []Tool{
-				CreateTool(toolId, "nmap", SubTaskStatusDoing, "端口扫描", "nmap", "-T4", ""),
+				CreateTool(toolId, "nmap", SubTaskStatusDoing, "端口扫描", "nmap", "-T4 -p 11434,1337,7000-9000", ""),
 			})
-			portScanResult, err := utils.NmapScan(host, "1-65535")
+			portScanResult, err := utils.NmapScan(host, "11434,1337,7000-9000")
 			if err != nil {
 				return err
 			}
