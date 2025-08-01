@@ -39,7 +39,9 @@ type CmdContent struct {
 	Content json.RawMessage `json:"content"`
 }
 
-var statusId string
+type CmdConfig struct {
+	StatusId string
+}
 
 type PromptContent struct {
 	Results    []PromptResults `json:"results"`
@@ -57,7 +59,7 @@ type PromptResults struct {
 	Reason        string `json:"reason"`
 }
 
-func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callbacks TaskCallbacks) {
+func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callbacks TaskCallbacks, config *CmdConfig) {
 	var cmd CmdContent
 	if err := json.Unmarshal([]byte(line), &cmd); err != nil {
 		fmt.Println(line)
@@ -86,8 +88,8 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 			gologger.WithError(err).Errorln("Failed to AgentMsgTypeStatusUpdate unmarshal command", cmd.Content)
 			return
 		}
-		statusId = uuid.NewString()
-		callbacks.StepStatusUpdateCallback(content.StepId, statusId, AgentStatusCompleted, content.Brief, content.Description)
+		config.StatusId = uuid.NewString()
+		callbacks.StepStatusUpdateCallback(content.StepId, config.StatusId, AgentStatusCompleted, content.Brief, content.Description)
 	case AgentMsgTypeToolUsed:
 		var content CmdToolUsed
 		if err := json.Unmarshal(cmd.Content, &content); err != nil {
@@ -95,7 +97,7 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 			return
 		}
 		tool := CreateTool(content.ToolId, content.ToolId, statusString(content.Status), content.Brief, content.Brief, "", "")
-		callbacks.ToolUsedCallback(content.StepId, statusId, content.Brief, []Tool{tool})
+		callbacks.ToolUsedCallback(content.StepId, config.StatusId, content.Brief, []Tool{tool})
 	case AgentMsgTypeActionLog:
 		var content CmdActionLog
 		if err := json.Unmarshal(cmd.Content, &content); err != nil {

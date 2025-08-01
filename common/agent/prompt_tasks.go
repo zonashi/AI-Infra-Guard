@@ -160,9 +160,9 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		tasks = append(tasks, CreateSubTask(SubTaskStatusTodo, title, 0, strconv.Itoa(i+1)))
 	}
 	callbacks.PlanUpdateCallback(tasks)
-
+	config := CmdConfig{StatusId: ""}
 	err = utils.RunCmd(DIR, NAME, argv, func(line string) {
-		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
+		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks, &config)
 	})
 	return err
 }
@@ -215,7 +215,9 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 	argv = append(argv, "--lang", request.Language)
 	argv = append(argv, "--scenarios", fmt.Sprintf("Custom:prompt=%s", param.Prompt))
 	argv = append(argv, "--choice", "parallel")
-	argv = append(argv, "--techniques", "Emoji", "PromptInjection", "GrayBox", "ICRTJailbreak", "BestofN", "Roleplay", "CrescendoJailbreaking", "SequentialJailbreak", "LinearJailbreaking", "TreeJailbreaking")
+	argv = append(argv, "--techniques",
+		"PromptInjection", "SequentialJailbreak", "Roleplay", "Emoji", "GrayBox", "ICRTJailbreak", "BestofN", "CrescendoJailbreaking", "LinearJailbreaking", "TreeJailbreaking",
+	)
 
 	var tasks []SubTask
 	taskTitles := []string{
@@ -239,9 +241,10 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 		tasks = append(tasks, CreateSubTask(SubTaskStatusTodo, title, 0, strconv.Itoa(i+1)))
 	}
 	callbacks.PlanUpdateCallback(tasks)
+	config := CmdConfig{StatusId: ""}
 
 	err = utils.RunCmd(DIR, NAME, argv, func(line string) {
-		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
+		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks, &config)
 	})
 	return err
 }

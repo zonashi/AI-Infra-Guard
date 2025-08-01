@@ -919,7 +919,7 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 	case agent.TaskTypeModelJailbreak:
 		ret = "一键越狱任务 - " + fmt.Sprintf("模型:%s, prompt:%s", ModelName, req.Content)
 	case agent.TaskTypeModelRedteamReport:
-		ret = ModelName + " 大模型安全体检"
+		ret = "大模型安全体检 - " + ModelName
 	default:
 		ret = "其他任务 - " + req.Content
 	}
