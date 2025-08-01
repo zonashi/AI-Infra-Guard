@@ -73,6 +73,7 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 	}
 	var argv []string = make([]string, 0)
 	argv = append(argv, "run", "cli_run.py")
+	argv = append(argv, "--async_mode")
 
 	for _, model := range param.Model {
 		argv = append(argv, "--model", model.Model)
