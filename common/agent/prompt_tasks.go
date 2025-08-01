@@ -193,7 +193,7 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 		request.Language = "zh"
 	}
 	var argv []string = make([]string, 0)
-	argv = append(argv, "run", "cli_run.py")
+	argv = append(argv, "run", "cli_run.py", "--async_mode")
 
 	for _, model := range param.Model {
 		argv = append(argv, "--model", model.Model)
@@ -215,7 +215,7 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 	argv = append(argv, "--lang", request.Language)
 	argv = append(argv, "--scenarios", fmt.Sprintf("Custom:prompt=%s", param.Prompt))
 	argv = append(argv, "--choice", "parallel")
-	argv = append(argv, "--techniques", "ICRTJailbreak", "Ecoji", "Zalgo", "CrescendoJailbreaking")
+	argv = append(argv, "--techniques", "Emoji", "PromptInjection", "GrayBox", "ICRTJailbreak", "BestofN", "Roleplay", "CrescendoJailbreaking", "SequentialJailbreak", "LinearJailbreaking", "TreeJailbreaking")
 
 	var tasks []SubTask
 	taskTitles := []string{
