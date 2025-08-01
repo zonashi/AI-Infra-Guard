@@ -270,6 +270,10 @@ func (a *Agent) processMessage(data []byte) error {
 						a.SendPlanUpdate(task.SessionId, tasks)
 						gologger.Debugln("PlanUpdateCallback", tasks)
 					},
+					ErrorCallback: func(error string) {
+						a.SendError(task.SessionId, error)
+						gologger.Debugln("ErrorCallback", error)
+					},
 				}
 				go func() {
 					err := taskFunc.Execute(taskCtx, task, callbacks)

@@ -23,10 +23,25 @@ const (
 type ModelRedteamReport struct {
 	Server string
 }
+
 type ModelParams struct {
 	BaseUrl string `json:"base_url"`
 	Token   string `json:"token"`
 	Model   string `json:"model"`
+}
+
+func getDefaultEvalModel() (*ModelParams, error) {
+	baseUrl := os.Getenv("eval_base_url")
+	token := os.Getenv("eval_api_key")
+	model := os.Getenv("eval_model")
+	if baseUrl == "" || token == "" || model == "" {
+		return nil, fmt.Errorf("env not set")
+	}
+	return &ModelParams{
+		BaseUrl: baseUrl,
+		Token:   token,
+		Model:   model,
+	}, nil
 }
 
 func (m *ModelRedteamReport) GetName() string {
@@ -65,9 +80,16 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		argv = append(argv, "--api_key", model.Token)
 	}
 
-	argv = append(argv, "--evaluate_model", param.EvalModel.Model)
-	argv = append(argv, "--eval_base_url", param.EvalModel.BaseUrl)
-	argv = append(argv, "--eval_api_key", param.EvalModel.Token)
+	evalParams, err := getDefaultEvalModel()
+	if err == nil {
+		argv = append(argv, "--evaluate_model", evalParams.Model)
+		argv = append(argv, "--eval_base_url", evalParams.BaseUrl)
+		argv = append(argv, "--eval_api_key", evalParams.Token)
+	} else {
+		argv = append(argv, "--evaluate_model", param.EvalModel.Model)
+		argv = append(argv, "--eval_base_url", param.EvalModel.BaseUrl)
+		argv = append(argv, "--eval_api_key", param.EvalModel.Token)
+	}
 
 	argv = append(argv, "--techniques", "Raw")
 	argv = append(argv, "--choice", "serial")
@@ -138,7 +160,7 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 	}
 	callbacks.PlanUpdateCallback(tasks)
 
-	err := utils.RunCmd(DIR, NAME, argv, func(line string) {
+	err = utils.RunCmd(DIR, NAME, argv, func(line string) {
 		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
 	})
 	return err
@@ -178,9 +200,17 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 		argv = append(argv, "--api_key", model.Token)
 	}
 
-	argv = append(argv, "--evaluate_model", param.EvalModel.Model)
-	argv = append(argv, "--eval_base_url", param.EvalModel.BaseUrl)
-	argv = append(argv, "--eval_api_key", param.EvalModel.Token)
+	evalParams, err := getDefaultEvalModel()
+	if err == nil {
+		argv = append(argv, "--evaluate_model", evalParams.Model)
+		argv = append(argv, "--eval_base_url", evalParams.BaseUrl)
+		argv = append(argv, "--eval_api_key", evalParams.Token)
+	} else {
+		argv = append(argv, "--evaluate_model", param.EvalModel.Model)
+		argv = append(argv, "--eval_base_url", param.EvalModel.BaseUrl)
+		argv = append(argv, "--eval_api_key", param.EvalModel.Token)
+	}
+
 	argv = append(argv, "--lang", request.Language)
 	argv = append(argv, "--scenarios", fmt.Sprintf("Custom:prompt=%s", param.Prompt))
 	argv = append(argv, "--choice", "parallel")
@@ -209,7 +239,7 @@ func (m *ModelJailbreak) Execute(ctx context.Context, request TaskRequest, callb
 	}
 	callbacks.PlanUpdateCallback(tasks)
 
-	err := utils.RunCmd(DIR, NAME, argv, func(line string) {
+	err = utils.RunCmd(DIR, NAME, argv, func(line string) {
 		ParseStdoutLine(m.Server, DIR, tasks, line, callbacks)
 	})
 	return err

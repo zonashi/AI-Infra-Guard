@@ -149,5 +149,8 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 		}
 		content["content"] = content2
 		callbacks.ResultCallback(content)
+	case AgentMsgTypeError:
+		content := string(cmd.Content)
+		callbacks.ErrorCallback(content)
 	}
 }

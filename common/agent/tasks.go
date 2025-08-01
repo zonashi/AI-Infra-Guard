@@ -41,6 +41,8 @@ type StatusUpdateCallback func(planStepId, statusId, agentStatus, brief, descrip
 // PlanUpdateCallback 更新任务计划回调函数类型
 type PlanUpdateCallback func(tasks []SubTask)
 
+type ErrorCallback func(error string)
+
 // TaskCallbacks 任务回调函数集合
 type TaskCallbacks struct {
 	ResultCallback           ResultCallback       // 任务结果回调
@@ -49,6 +51,7 @@ type TaskCallbacks struct {
 	NewPlanStepCallback      NewPlanStepCallback  // 新建执行步骤回调
 	StepStatusUpdateCallback StatusUpdateCallback // 更新步骤状态回调
 	PlanUpdateCallback       PlanUpdateCallback   // 更新任务计划回调
+	ErrorCallback            ErrorCallback        // 错误回调
 }
 
 type TaskInterface interface {
