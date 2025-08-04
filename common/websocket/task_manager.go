@@ -913,7 +913,7 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 		}
 		if strings.Contains(ret, "github.com") {
 			ret += "Github:" + tm.extractFileNameFromURL(req.Content)
-		} else if strings.Contains(ret, "sse") {
+		} else {
 			ret += "SSE:" + req.Content
 		}
 	case agent.TaskTypeModelJailbreak:

@@ -17,6 +17,7 @@ type CmdStatusUpdate struct {
 	Brief       string `json:"brief"`
 	Description string `json:"description"`
 	StepId      string `json:"stepId"`
+	Status      string `json:"status"`
 }
 
 type CmdToolUsed struct {
@@ -88,8 +89,10 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 			gologger.WithError(err).Errorln("Failed to AgentMsgTypeStatusUpdate unmarshal command", cmd.Content)
 			return
 		}
-		config.StatusId = uuid.NewString()
-		callbacks.StepStatusUpdateCallback(content.StepId, config.StatusId, AgentStatusCompleted, content.Brief, content.Description)
+		if content.Status == AgentStatusRunning {
+			config.StatusId = uuid.NewString()
+		}
+		callbacks.StepStatusUpdateCallback(content.StepId, config.StatusId, content.Status, content.Brief, content.Description)
 	case AgentMsgTypeToolUsed:
 		var content CmdToolUsed
 		if err := json.Unmarshal(cmd.Content, &content); err != nil {
