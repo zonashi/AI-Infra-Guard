@@ -101,14 +101,14 @@ func (tm *TaskManager) AddTask(req *TaskCreateRequest, traceID string) error {
 
 	log.Infof("任务预存成功: trace_id=%s, sessionId=%s", traceID, req.SessionID)
 
-	// 3. 等待SSE连接建立（3秒超时）
-	timeout := 3 * time.Second
+	// 3. 等待SSE连接建立（30秒超时）
+	timeout := 10 * time.Second
 	start := time.Now()
 	for time.Since(start) < timeout {
 		if tm.sseManager.HasConnection(req.SessionID) {
 			break // 连接已建立
 		}
-		time.Sleep(50 * time.Millisecond) // 每50ms检查一次
+		time.Sleep(500 * time.Millisecond) // 每50ms检查一次
 	}
 
 	if !tm.sseManager.HasConnection(req.SessionID) {
@@ -911,7 +911,7 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 			// 直接调用现有的extractFileNameFromURL方法
 			ret += tm.extractFileNameFromURL(req.Attachments[0])
 		}
-		if strings.Contains(ret, "github.com") {
+		if strings.Contains(req.Content, "github.com") {
 			ret += "Github:" + tm.extractFileNameFromURL(req.Content)
 		} else {
 			ret += "SSE:" + req.Content
