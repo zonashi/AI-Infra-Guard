@@ -1,10 +1,8 @@
 package websocket
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Tencent/AI-Infra-Guard/common/utils/models"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -209,12 +207,12 @@ func (tm *TaskManager) dispatchTask(sessionId string, traceID string) error {
 			return nil, fmt.Errorf("获取模型信息失败: %v", err)
 		}
 		// 测试模型是否有效
-		ai := models.NewOpenAI(model.Token, model.ModelName, model.BaseURL)
-		err = ai.Vaild(context.Background())
-		if err != nil {
-			log.Errorf("模型无效: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelId, err)
-			return nil, fmt.Errorf("模型无效: %v", err)
-		}
+		//ai := models.NewOpenAI(model.Token, model.ModelName, model.BaseURL)
+		//err = ai.Vaild(context.Background())
+		//if err != nil {
+		//	log.Errorf("模型无效: trace_id=%s, sessionId=%s, modelID=%s, error=%v", traceID, sessionId, modelId, err)
+		//	return nil, fmt.Errorf("模型无效: %v", err)
+		//}
 		p := database.ModelParams{
 			Model:   model.ModelName,
 			Token:   model.Token,
