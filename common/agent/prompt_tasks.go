@@ -118,7 +118,7 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 	}
 
 	if len(param.Datasets.DataFile) == 0 {
-		param.Datasets.DataFile = []string{"JailbreakPrompts-Top"}
+		param.Datasets.DataFile = []string{"JailbreakPrompts-Tiny"}
 	}
 
 	for _, dataName := range param.Datasets.DataFile {

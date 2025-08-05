@@ -36,6 +36,7 @@ type EvaluationDataset struct {
 	Author         string               `json:"author,omitempty"`
 	Source         []string             `json:"source,omitempty"`
 	Count          int                  `json:"count"`
+	Default        bool                 `json:"default,omitempty"`
 	Tags           []string             `json:"tags,omitempty"`
 	Recommendation int                  `json:"recommendation,omitempty"`
 	Language       string               `json:"language,omitempty"`
