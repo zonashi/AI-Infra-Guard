@@ -50,6 +50,7 @@ type PromptContent struct {
 	Total      int             `json:"total"`
 	Score      float32         `json:"score"`
 	Attachment string          `json:"attachment"`
+	Jailbreak  int             `json:"jailbreak"`
 }
 type PromptResults struct {
 	Status        string `json:"status"`
