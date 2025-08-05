@@ -440,6 +440,9 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 		if url == "" {
 			return fmt.Errorf("url is empty")
 		}
+		if !strings.HasPrefix(url, "http") {
+			return fmt.Errorf("url must start with http")
+		}
 		callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "A.I.G开始扫描", fmt.Sprintf("开始扫描URL: %s", url))
 		r, err := scanner.InputUrl(ctx, url)
 		if err != nil || r == nil {
