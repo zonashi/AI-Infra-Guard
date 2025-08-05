@@ -42,6 +42,7 @@ type CmdContent struct {
 
 type CmdConfig struct {
 	StatusId string
+	Status   string
 }
 
 type PromptContent struct {
@@ -91,6 +92,12 @@ func ParseStdoutLine(server, rootDir string, tasks []SubTask, line string, callb
 		}
 		if content.Status == AgentStatusRunning {
 			config.StatusId = uuid.NewString()
+			config.Status = "running"
+		} else if content.Status == AgentStatusCompleted {
+			if config.Status == "completed" {
+				config.StatusId = uuid.NewString()
+			}
+			config.Status = "completed"
 		}
 		callbacks.StepStatusUpdateCallback(content.StepId, config.StatusId, content.Status, content.Brief, content.Description)
 	case AgentMsgTypeToolUsed:
