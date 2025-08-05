@@ -18,9 +18,12 @@ import (
 )
 
 // 合法性校验
-var validName = regexp.MustCompile(`^[a-zA-Z0-9 _-]+$`)
+var validName = regexp.MustCompile(`^[a-zA-Z0-9\\._ -]+$`)
 
 func isValidName(name string) bool {
+	if strings.Contains(name, "..") {
+		return false
+	}
 	return validName.MatchString(name)
 }
 
