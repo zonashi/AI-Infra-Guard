@@ -66,7 +66,7 @@ func HandleCreate(readAndSave func(content string) error) gin.HandlerFunc {
 // HandleEdit 返回处理编辑请求的HandlerFunc
 func HandleEdit(updateFunc func(id string, content string) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		name := c.Param("name")
+		name := c.Param("id")
 		if name == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "名称不能为空"})
 			return

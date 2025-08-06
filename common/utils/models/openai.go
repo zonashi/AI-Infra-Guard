@@ -45,7 +45,7 @@ func (ai *OpenAI) Vaild(ctx context.Context) error {
 		},
 		Model:               ai.Model,
 		Seed:                openai.Int(24),
-		MaxCompletionTokens: openai.Int(1),
+		MaxCompletionTokens: openai.Int(100),
 	})
 	if err != nil {
 		return err
