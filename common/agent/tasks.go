@@ -331,6 +331,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 		transport = "url"
 	}
 	quickMode := params.Quick
+	var target string
 
 	//0. 发送初始任务计划
 	taskTitles := []string{
@@ -405,6 +406,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	}
 	callbacks.StepStatusUpdateCallback(step01, uuid.NewString(), AgentStatusCompleted, "配置AI模型", fmt.Sprintf("配置AI模型: %s", params.Model.Model))
 	logger := gologger.NewLogger()
+	startTime := time.Now().Unix()
 	modelConfig := models.NewOpenAI(params.Model.Token, params.Model.Model, params.Model.BaseUrl)
 	scanner := mcp.NewScanner(modelConfig, logger)
 	if params.Language == "" {
@@ -433,6 +435,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 
 	var scanResults *mcp.McpResult
 	var scanType string
+	var CodeLanguage string
 
 	if transport == "url" {
 		scanType = "URL扫描"
@@ -444,6 +447,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 			return fmt.Errorf("url must start with http")
 		}
 		callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "A.I.G开始扫描", fmt.Sprintf("开始扫描URL: %s", url))
+		target = url
 		r, err := scanner.InputUrl(ctx, url)
 		if err != nil || r == nil {
 			return err
@@ -468,6 +472,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 			for _, file := range files {
 				// 下载文件
 				gologger.Infof("开始下载文件: %s", file)
+				target = file
 				ext := ""
 				supports := []string{".zip", ".tar.gz", ".tgz", ".whl"}
 				for _, support := range supports {
@@ -502,6 +507,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 				folder = extractPath
 			}
 		} else {
+			target = params.Content
 			extractPath, _ := filepath.Abs(filepath.Join(tempDir, fmt.Sprintf("tmp-%d", time.Now().UnixMicro())))
 			err := utils.GitClone(params.Content, extractPath, 30*time.Second)
 			if err != nil {
@@ -521,6 +527,8 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 			return err
 		}
 		scanResults = results
+		// 脚本语言GetTop
+		CodeLanguage = utils.GetTopLanguage(utils.AnalyzeLanguage(folder))
 	}
 	callbacks.StepStatusUpdateCallback(step02, uuid.NewString(), AgentStatusCompleted, "A.I.G完成工作", "MCP安全扫描任务完成")
 
@@ -542,13 +550,19 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 	completedTool03 := CreateTool(toolId03, "mcp_report_generator", ToolStatusDone, "MCP扫描报告生成完成", "生成", "扫描日志", "")
 	callbacks.ToolUsedCallback(step03, statusId03, "报告生成完成", []Tool{completedTool03})
 	callbacks.StepStatusUpdateCallback(step03, statusId03, AgentStatusCompleted, "A.I.G完成工作", "MCP扫描报告生成完成")
-
+	endTime := time.Now().Unix()
 	//7. 发送任务最终结果
 	result := map[string]interface{}{
-		"readme":   readMe,
-		"scanType": scanType,
-		"results":  scanResults.Issues,
-		"report":   scanResults.Report,
+		"readme":     readMe,
+		"score":      100,
+		"language":   CodeLanguage,
+		"target":     target,
+		"plugins":    params.Plugins,
+		"start_time": startTime,
+		"end_time":   endTime,
+		"scanType":   scanType,
+		"results":    scanResults.Issues,
+		"report":     scanResults.Report,
 	}
 
 	// 最终更新任务计划

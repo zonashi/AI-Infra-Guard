@@ -908,8 +908,7 @@ func (tm *TaskManager) generateTaskTitle(req *TaskCreateRequest) string {
 		if len(req.Attachments) > 0 && req.Attachments[0] != "" {
 			// 直接调用现有的extractFileNameFromURL方法
 			ret += tm.extractFileNameFromURL(req.Attachments[0])
-		}
-		if strings.Contains(req.Content, "github.com") {
+		} else if strings.Contains(req.Content, "github.com") {
 			ret += "Github:" + tm.extractFileNameFromURL(req.Content)
 		} else {
 			ret += "SSE:" + req.Content

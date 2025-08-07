@@ -14,21 +14,21 @@ import (
 )
 
 func HandleList(root string, loadFile func(filePath string) (interface{}, error)) gin.HandlerFunc {
-	var allItems []interface{}
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return nil // 忽略错误
-		}
-		if !d.IsDir() {
-			item, err := loadFile(path)
-			if err != nil {
-				return err
-			}
-			allItems = append(allItems, item)
-		}
-		return nil
-	})
 	return func(c *gin.Context) {
+		var allItems []interface{}
+		err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return nil // 忽略错误
+			}
+			if !d.IsDir() {
+				item, err := loadFile(path)
+				if err != nil {
+					return err
+				}
+				allItems = append(allItems, item)
+			}
+			return nil
+		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"status":  1,
