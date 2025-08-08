@@ -33,6 +33,9 @@ WORKDIR /app/AIG-PromptSecurity
 RUN uv pip install --system -r requirements.txt
 RUN uv sync
 
+ENV DEEPEVAL_TELEMETRY_OPT_OUT=YES
+ENV DEEPTEAM_TELEMETRY_OPT_OUT=YES
+
 # 从builder阶段复制agent
 COPY --from=builder /app/agent /app/agent
 COPY --from=builder /app/data /app/data
