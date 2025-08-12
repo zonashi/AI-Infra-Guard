@@ -7,8 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
+
 	"trpc.group/trpc-go/trpc-go/log"
 
 	"github.com/Tencent/AI-Infra-Guard/common/fingerprints/parser"
@@ -25,6 +28,12 @@ func isValidName(name string) bool {
 		return false
 	}
 	return validName.MatchString(name)
+}
+
+// FingerprintWithTime 包含指纹数据和文件修改时间的结构体
+type FingerprintWithTime struct {
+	FingerPrint parser.FingerPrint
+	ModTime     time.Time
 }
 
 // 评测集数据结构定义
@@ -64,7 +73,7 @@ func HandleListFingerprints(c *gin.Context) {
 	nameQuery := strings.ToLower(c.DefaultQuery("q", ""))
 
 	// 3. 读取 data/fingerprints/ 下所有分类和YAML文件
-	var allFingerprints []parser.FingerPrint
+	var allFingerprintsWithTime []FingerprintWithTime
 	root := "data/fingerprints"
 	filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -74,34 +83,76 @@ func HandleListFingerprints(c *gin.Context) {
 			content, _ := os.ReadFile(path)
 			fp, err := parser.InitFingerPrintFromData(content)
 			if err == nil && fp != nil {
-				allFingerprints = append(allFingerprints, *fp)
+				// 获取文件修改时间
+				fileInfo, _ := d.Info()
+				modTime := time.Time{}
+				if fileInfo != nil {
+					modTime = fileInfo.ModTime()
+				}
+				allFingerprintsWithTime = append(allFingerprintsWithTime, FingerprintWithTime{
+					FingerPrint: *fp,
+					ModTime:     modTime,
+				})
 			}
 		}
 		return nil
 	})
 
 	// 4. 条件过滤
-	var filteredFingerprints []parser.FingerPrint
+	var filteredFingerprintsWithTime []FingerprintWithTime
 	if nameQuery == "" {
-		filteredFingerprints = allFingerprints
+		filteredFingerprintsWithTime = allFingerprintsWithTime
 	} else {
-		for _, fp := range allFingerprints {
+		for _, fpWithTime := range allFingerprintsWithTime {
+			fp := fpWithTime.FingerPrint
 			if strings.Contains(strings.ToLower(fp.Info.Name), nameQuery) {
-				filteredFingerprints = append(filteredFingerprints, fp)
+				filteredFingerprintsWithTime = append(filteredFingerprintsWithTime, fpWithTime)
 				continue
 			}
 			if strings.Contains(strings.ToLower(fp.Info.Desc), nameQuery) {
-				filteredFingerprints = append(filteredFingerprints, fp)
+				filteredFingerprintsWithTime = append(filteredFingerprintsWithTime, fpWithTime)
 				continue
 			}
 			if strings.Contains(strings.ToLower(fp.Info.Author), nameQuery) {
-				filteredFingerprints = append(filteredFingerprints, fp)
+				filteredFingerprintsWithTime = append(filteredFingerprintsWithTime, fpWithTime)
 				continue
 			}
 		}
 	}
 
-	// 5. 分页
+	// 5. 复合排序：如果有Recommendation，先按Recommendation降序；否则按文件修改时间降序
+	sort.Slice(filteredFingerprintsWithTime, func(i, j int) bool {
+		fpI := filteredFingerprintsWithTime[i].FingerPrint
+		fpJ := filteredFingerprintsWithTime[j].FingerPrint
+
+		// 如果两个都有Recommendation（>0），按Recommendation降序
+		if fpI.Info.Recommendation > 0 && fpJ.Info.Recommendation > 0 {
+			if fpI.Info.Recommendation != fpJ.Info.Recommendation {
+				return fpI.Info.Recommendation > fpJ.Info.Recommendation
+			}
+			// Recommendation相同时，按文件修改时间降序
+			return filteredFingerprintsWithTime[i].ModTime.After(filteredFingerprintsWithTime[j].ModTime)
+		}
+
+		// 如果只有一个有Recommendation，有Recommendation的排前面
+		if fpI.Info.Recommendation > 0 && fpJ.Info.Recommendation <= 0 {
+			return true
+		}
+		if fpI.Info.Recommendation <= 0 && fpJ.Info.Recommendation > 0 {
+			return false
+		}
+
+		// 如果两个都没有Recommendation，按文件修改时间降序
+		return filteredFingerprintsWithTime[i].ModTime.After(filteredFingerprintsWithTime[j].ModTime)
+	})
+
+	// 提取指纹数据用于分页和返回
+	var filteredFingerprints []parser.FingerPrint
+	for _, fpWithTime := range filteredFingerprintsWithTime {
+		filteredFingerprints = append(filteredFingerprints, fpWithTime.FingerPrint)
+	}
+
+	// 6. 分页
 	total := len(filteredFingerprints)
 	start := (page - 1) * size
 	end := start + size
@@ -113,7 +164,7 @@ func HandleListFingerprints(c *gin.Context) {
 	}
 	items := filteredFingerprints[start:end]
 
-	// 6. 返回
+	// 7. 返回
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
 		"message": "success",
@@ -664,7 +715,12 @@ func HandleListEvaluations(c *gin.Context) {
 		}
 	}
 
-	// 5. 分页
+	// 5. 默认排序：按照Recommendation降序排列
+	sort.Slice(filteredEvaluations, func(i, j int) bool {
+		return filteredEvaluations[i].Recommendation > filteredEvaluations[j].Recommendation
+	})
+
+	// 6. 分页
 	total := len(filteredEvaluations)
 	start := (page - 1) * size
 	end := start + size
@@ -676,7 +732,7 @@ func HandleListEvaluations(c *gin.Context) {
 	}
 	items := filteredEvaluations[start:end]
 
-	// 6. 返回
+	// 7. 返回
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
 		"message": "success",

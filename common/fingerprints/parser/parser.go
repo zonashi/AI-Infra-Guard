@@ -9,12 +9,13 @@ import (
 
 // FingerPrintInfo 定义了指纹的基本信息
 type FingerPrintInfo struct {
-	Name     string            `yaml:"name" json:"name"`
-	Author   string            `yaml:"author" json:"author"`
-	Example  []string          `yaml:"example,omitempty" json:"example,omitempty"`
-	Desc     string            `yaml:"desc,omitempty" json:"desc,omitempty"`
-	Severity string            `yaml:"severity" json:"severity"`
-	Metadata map[string]string `yaml:"metadata" json:"metadata"`
+	Name           string            `yaml:"name" json:"name"`
+	Author         string            `yaml:"author" json:"author"`
+	Example        []string          `yaml:"example,omitempty" json:"example,omitempty"`
+	Desc           string            `yaml:"desc,omitempty" json:"desc,omitempty"`
+	Severity       string            `yaml:"severity" json:"severity"`
+	Metadata       map[string]string `yaml:"metadata" json:"metadata"`
+	Recommendation int               `yaml:"recommendation,omitempty" json:"recommendation,omitempty"`
 }
 
 // Extractor 定义了从响应中提取信息的规则
