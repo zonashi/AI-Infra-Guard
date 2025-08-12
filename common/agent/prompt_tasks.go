@@ -117,7 +117,7 @@ func (m *ModelRedteamReport) Execute(ctx context.Context, request TaskRequest, c
 		argv = append(argv, scenarios)
 	}
 
-	if len(param.Datasets.DataFile) == 0 {
+	if len(param.Datasets.DataFile) == 0 && len(request.Attachments) == 0 {
 		param.Datasets.DataFile = []string{"JailbreakPrompts-Tiny"}
 	}
 
