@@ -15,7 +15,7 @@
 
 ## 联系我们
 
-欢迎反馈平台Bug、共建检测能力或探讨业务合作，可随时企微联系Nickyccwu，也欢迎大家加入A.I.G交流群讨论。
+欢迎反馈平台Bug、共建检测能力或探讨业务合作，欢迎大家加入A.I.G交流群讨论。
 <p align="center">
     <img alt="A.I.G Logo" width="20%" src="./assets/wechatgroup.png">
 </p>
