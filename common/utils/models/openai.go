@@ -43,9 +43,8 @@ func (ai *OpenAI) Vaild(ctx context.Context) error {
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("only return '1'"),
 		},
-		Model:               ai.Model,
-		Seed:                openai.Int(24),
-		MaxCompletionTokens: openai.Int(100),
+		Model: ai.Model,
+		Seed:  openai.Int(24),
 	})
 	if err != nil {
 		return err

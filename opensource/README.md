@@ -16,13 +16,11 @@
 - 至少 1GB 可用磁盘空间
 
 ## 快速开始
-
-1. 构建镜像
-
+一键部署
 ```bash
-docker-compose -f docker-compose.images.yml up -d
+docker-compose up -d
 ```
-f
+
 ### 目录说明
 
 | 目录/文件      | 说明               | 挂载路径                      |
