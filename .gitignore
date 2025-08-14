@@ -8,3 +8,5 @@ temp_uploads
 logs
 db
 uploads
+data/eval
+data/exported_groups

@@ -4,65 +4,25 @@
 
 ## 一键安装
 
-### 一键Docker部署
-
-
-安装git / docker 等基础组件
-
-### 从Docker Hub安装
-
+### 基于Docker部署
 ```bash
-xxx
-```
-
-### 从Github下载安装最新版
-
-```bash
-git clone xxx
-cd xxx
 docker-compose -f docker-compose.images.yml up -d
 ```
 
 安装完成后，您可以通过浏览器访问 `http://localhost:8088` 来使用A.I.G的Web界面。
 
-### 从源码编译Docker
+## 配置模型KEY
 
-如果您希望从最新的源码编译docker镜像。
+A.I.G 的`MCP扫描`、`大模型安全体检`功能需要使用到大模型API。若需要使用这两个功能，可以先配置大模型API KEY。
 
-```bash
-docker-compose up -d
-```
+![image-20250813113510664](./assets/image-20250813113510664.png)
 
-## 一键配置
+配置大模型必须的 模型名称、API Key、Base URL，后点击保存即可。
 
-### 一键Docker部署
-
-通过Web界面的“模型管理”功能可配置A.I.G使用的API KEY
-
-通过配置文件xxx配置。
+![image-20250813113550192](./assets/image-20250813113550192.png)
 
 
-
-### 服务架构
-
-```
-┌─────────────────┐    ┌─────────────────┐
-│   Webserver     │    │     Agent       │
-│   (Go + Web)    │◄──►│ (Go + Python)   │
-│   Port: 8088    │    │                 │
-└─────────────────┘    └─────────────────┘
-         │                       │
-         └───────┬───────────────┘
-                 │
-    ┌─────────────────────────┐
-    │   Shared Data Volume    │
-    │      (data/ dir)        │
-    └─────────────────────────┘
-```
-
-
-
-### 常见问题
+## 常见问题
 
 1. **端口冲突**
    ```bash
@@ -88,28 +48,17 @@ docker-compose up -d
     ```bash
     # 停止服务
     docker-compose down
-
+    
     # 停止服务并删除数据卷（谨慎使用）
     docker-compose down -v
     ```
-
-5. **模型API错误**
-
-6. **加载指纹失败**
 
 
 ## 更新升级
 
 ```bash
-# 拉取最新代码
-git pull
-
 # 重新构建并启动
-docker-compose up -d --build
-
+docker-compose -f docker-compose.images.yml up -d --build
 # 清理旧镜像
 docker image prune -f
-``` 
-
-
-
+```

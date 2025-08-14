@@ -1,133 +1,42 @@
-AI-Infra-Guard Docker 部署指南
+**A.I.G (AI-Infra-Guard)** 是由腾讯朱雀实验室开发的一款全面、智能与易用的AI红队安全测试平台。
 
-概述
+## 核心功能
 
-AI-Infra-Guard 是一个基于 Docker 的 AI 基础设施安全扫描工具。本指南将帮助您快速部署和运行该服务。
+- **AI基础设施漏洞扫描**：通过精准的指纹识别，检测AI训练、部署与应用构建中使用的各类框架组件（如Ollama、ComfyUI等）Web服务的已知CVE漏洞。
+- **MCP Server安全检测**：基于AI Agent智能检测MCP Server是否存在工具投毒与代码漏洞等安全威胁，帮助MCP开发者与应用市场在上架前完成安全认证。
+- **大模型安全体检**：通过高质量与多样性的评测集，自动化评估不同大模型在面对恶意、对抗或诱导类提示词输入时的整体安全性，导出Badcase用于安全对齐与护栏加固。
+- **大模型一键越狱**：通过多个黑盒越狱攻击算法，自动化尝试绕过大模型安全防护，针对性评估大模型在特定场景下输出的安全性，帮助业务与安全团队进行针对性安全加固。
+- **AI应用透视镜**：基于开源社区收集的AI应用System Prompt列表，并进行分类标注，帮助业务快速了解主流LLM ChatBot与AI
+  Agent的提示词设计思路。
 
-系统要求
+## 系统要求
 
 - Docker 20.10 或更高版本
 - 至少 2GB 可用内存
 - 至少 1GB 可用磁盘空间
 
-快速开始
+## 快速开始
 
 1. 构建镜像
 
 ```bash
-# 克隆项目
-git clone <repository-url>
-cd AI-Infra-Guard
-
-# 构建 Docker 镜像
-docker build -t ai-infra-guard:latest .
+docker-compose -f docker-compose.images.yml up -d
 ```
+f
+### 目录说明
 
-2. 创建必要的目录
+| 目录/文件      | 说明               | 挂载路径                      |
+|------------|------------------|---------------------------|
+| `uploads/` | 上传文件存储目录         | `/ai-infra-guard/uploads` |
+| `db/`      | 数据库文件目录          | `/ai-infra-guard/db`      |
+| `data/`    | 知识库数据目录（指纹库、漏洞库） | `/ai-infra-guard/data`    |
+| `logs/`    | 应用日志目录           | `/ai-infra-guard/logs`    |
 
-```bash
-# 创建数据目录
-mkdir -p ./uploads ./db ./data ./logs
-
-### 3. 运行容器
-
-#### 方式一：后台运行
-
-```bash
-##权限不够加sudo
-docker run -d \
-  --name ai-infra-guard \
-  -p 8088:8088 \
-  -v $(pwd)/uploads:/ai-infra-guard/uploads \
-  -v $(pwd)/db:/ai-infra-guard/db \
-  -v $(pwd)/data:/ai-infra-guard/data \
-  -v $(pwd)/logs:/ai-infra-guard/logs \
-  ai-infra-guard:latest
-```
-
-#### 方式二：前台运行（查看实时日志）
-
-```bash
-##权限不够加sudo
-docker run --rm -it \
-  --name ai-infra-guard \
-  -p 8088:8088 \
-  -v $(pwd)/uploads:/ai-infra-guard/uploads \
-  -v $(pwd)/db:/ai-infra-guard/db \
-  -v $(pwd)/data:/ai-infra-guard/data \
-  -v $(pwd)/logs:/ai-infra-guard/logs \
-  ai-infra-guard:latest
-```
-
-**注意**：日志文件现在存储在 `./logs/trpc.log` 目录中，支持持久化。
-
-
-目录说明
-
-| 目录/文件 | 说明 | 挂载路径 |
-|-----------|------|----------|
-| `uploads/` | 上传文件存储目录 | `/ai-infra-guard/uploads` |
-| `db/` | 数据库文件目录 | `/ai-infra-guard/db` |
-| `data/` | 知识库数据目录（指纹库、漏洞库） | `/ai-infra-guard/data` |
-| `logs/` | 应用日志目录 | `/ai-infra-guard/logs` |
-
-访问服务
+### 访问服务
 
 服务启动后，您可以通过以下方式访问：
 
 - **Web 界面**: http://localhost:8088
-- **API 接口**: http://localhost:8088/api/
+- **帮助文档页面**: http://localhost:8088/help?menu=case-studies
 
-常用操作
-
-查看容器状态
-
-```bash
-# 查看运行中的容器
-docker ps
-
-# 查看容器日志
-docker logs ai-infra-guard
-
-# 查看容器健康状态
-docker inspect ai-infra-guard | grep Health -A 10
-```
-
-停止和重启
-
-```bash
-# 停止容器
-docker stop ai-infra-guard
-
-# 启动容器
-docker start ai-infra-guard
-
-# 重启容器
-docker restart ai-infra-guard
-```
-
-进入容器
-
-```bash
-# 进入运行中的容器
-docker exec -it ai-infra-guard /bin/bash
-```
-
-查看日志
-
-```bash
-# 查看容器日志
-docker logs -f ai-infra-guard
-
-# 查看本地日志文件
-tail -f ./logs/trpc.log
-```
-
-数据持久化
-
-所有重要数据都会持久化到宿主机：
-
-- **数据库**: `./db/tasks.db` - 任务和配置数据
-- **上传文件**: `./uploads/` - 用户上传的文件
-- **知识库**: `./data/` - 指纹库和漏洞库数据
-- **应用日志**: `./trpc.log` - 应用运行日志
+ 注: webserver 默认会开放到0.0.0.0上，且暂无权限管控,仅限于测试使用。

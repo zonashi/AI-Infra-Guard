@@ -219,6 +219,9 @@ func RunWebServer(options *options.Options) {
 				c.String(500, "Internal Server Error")
 				return
 			}
+			c.Header("Content-Type", "text/html")
+			c.Data(200, "text/html", assetData)
+			return
 		}
 
 		mimeType := mime.TypeByExtension(filepath.Ext(assetPath))

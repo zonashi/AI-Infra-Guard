@@ -1,0 +1,12 @@
+{
+  "prompt": "Assistant is a large language model trained by OpenAI.",
+  "web_search": false,
+  "sec_policies": false,
+  "model_version": "Chatgpt",
+  "product": "Chatgpt",
+  "upload_file": false,
+  "code_exec": false,
+  "multi_modal": false,
+  "affiliation": "OpenAI",
+  "update_date": "2022-12-01"
+}

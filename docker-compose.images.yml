@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.8'
 
 services:
   webserver:
@@ -36,6 +36,4 @@ services:
 networks:
   ai-infra-guard-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.28.0.0/16
+    name: ai-infra-guard-network
