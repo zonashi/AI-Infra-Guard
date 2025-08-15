@@ -35,6 +35,6 @@ docker-compose up -d
 服务启动后，您可以通过以下方式访问：
 
 - **Web 界面**: http://localhost:8088
-- **帮助文档页面**: http://localhost:8088/help?menu=case-studies
+- **帮助文档页面**: http://localhost:8088/help?menu=getting-started
 
- 注: webserver 默认会开放到0.0.0.0上，且暂无权限管控,仅限于测试使用。
+ 注: webserver 默认会开放到0.0.0.0上，且暂无权限管控,仅限于测试使用。请多帮助请参考帮助文档页面

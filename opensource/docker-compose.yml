@@ -32,7 +32,8 @@ services:
     networks:
       - ai-infra-guard-network
     depends_on:
-      - webserver
+      webserver:
+        condition: service_healthy
 networks:
   ai-infra-guard-network:
     driver: bridge
