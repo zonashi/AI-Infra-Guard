@@ -37,7 +37,7 @@ AI Infra Guard内置了丰富的AI组件指纹库，可通过"插件管理"页�
 3. 支持指纹搜索、新增、修改等操作
 点击左下角插件管理页面可以看到AIG内置的指纹库以及漏洞库。
 
-![image-20250731173621392](./assets/image-20250731173621392.png)
+![image-20250814173036377](./assets/image-20250814173036377.png)
 
 在插件管理中可以搜索指纹、对应漏洞、新增、修改等操作，修改后再次扫描便会使用最新的指纹以及漏洞库。
 
@@ -104,17 +104,24 @@ http:
 
 ```yaml
 info:
-  name: gradio
-  author: Security Team
+  name: dify
+  author: 腾讯朱雀实验室
   severity: info
   metadata:
-    product: gradio
-    vendor: gradio
+    product: dify
+    vendor: dify
 http:
   - method: GET
     path: '/'
     matchers:
-      - body="<script>window.gradio_config = {" || body="document.getElementsByTagName(\"gradio-app\");"
+      - body="<title>Dify</title>" || icon="97378986"
+version:
+  - method: GET
+    path: '/console/api/version'
+    extractor:
+      part: header
+      group: 1
+      regex: 'x-version:\s*(\d+\.\d+\.?\d+?)'
 ```
 
 ### 匹配语法说明

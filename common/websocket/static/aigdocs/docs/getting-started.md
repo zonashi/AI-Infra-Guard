@@ -15,7 +15,7 @@ docker-compose -f docker-compose.images.yml up -d
 
 A.I.G 的`MCP扫描`、`大模型安全体检`功能需要使用到大模型API。若需要使用这两个功能，可以先配置大模型API KEY。
 
-![image-20250813113510664](./assets/image-20250813113510664.png)
+![image-20250814173229996](./assets/image-20250814173229996.png)
 
 配置大模型必须的 模型名称、API Key、Base URL，后点击保存即可。
 

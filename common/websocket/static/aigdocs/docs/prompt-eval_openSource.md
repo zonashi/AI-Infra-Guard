@@ -51,8 +51,10 @@ Prompt安全评测提供简单易用、高效全面的大模型安全能力检�
 
 **临时上传：**
 - 在执行体检任务时临时上传，任务完成后不保存
-- 兼容主流格式（CSV、JSON、JSONL、Excel、Parquet、TXT） 
-> 说明：未来版本将智能识别prompt列名，支持自定义列名配置
+- 兼容主流格式（CSV、JSON、JSONL、Excel、Parquet、TXT）
+- 自动识别常见prompt列名（如prompt、question、query、text、content等）
+
+> 说明：未来版本将支持用户自定义列名配置
 
 **数据集管理：**
 - 通过管理页面永久保存到系统，支持重复使用和共享

@@ -16,7 +16,7 @@
 
 A.I.G的核心能力之一就是其丰富且可快速配置的插件。
 
-您可以参考项目Github源码中的 `data/fingerprints` 和 `data/vuln` 目录下的现有规则格式，创建新的YAML文件，并通过Pull Request的方式提交。
+您可以参考项目Github源码中的 `data`  目录下的现有规则格式，创建新的文件，并通过Pull Request的方式提交。
 
 
 感谢以下对A.I.G项目有过代码贡献的开源社区开发者们：
