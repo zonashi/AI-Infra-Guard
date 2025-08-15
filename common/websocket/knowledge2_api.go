@@ -188,12 +188,10 @@ func mcpDeleteFunc(id string) error {
 	}
 
 	filePath := filepath.Join(MCPROOT, id+".yaml")
-
 	// 检查文件是否存在
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return errors.New("文件不存在")
 	}
-
 	return os.Remove(filePath)
 }
 
