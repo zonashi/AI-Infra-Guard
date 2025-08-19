@@ -963,40 +963,24 @@ func HandleDeleteEvaluation(c *gin.Context) {
 		return
 	}
 
-	var deleted []string
-	var notFound []string
-	var invalid []string
-
 	for _, name := range req.Names {
 		// 使用已存在的合法性校验函数防止路径遍历攻击
 		if !isValidName(name) {
-			invalid = append(invalid, name)
-			continue
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集名称非法，只允许字母、数字、下划线和横线"})
+			return
 		}
 		jsonPath := filepath.Join("data/eval", name+".json")
 		if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
-			notFound = append(notFound, name)
-			continue
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "评测集不存在"})
+			return
 		}
-		if err := os.Remove(jsonPath); err == nil {
-			deleted = append(deleted, name)
+		if err := os.Remove(jsonPath); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"status": 1, "message": "删除失败: " + err.Error()})
+			return
 		}
 	}
-
-	msg := "删除完成"
-	if len(notFound) > 0 {
-		msg += "，部分评测集未找到: " + strings.Join(notFound, ", ")
-	}
-	if len(invalid) > 0 {
-		msg += "，部分评测集名称非法: " + strings.Join(invalid, ", ")
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"status":  0,
-		"message": msg,
-		"data": gin.H{
-			"deleted":  deleted,
-			"notFound": notFound,
-		},
+		"message": "ok",
 	})
 }
