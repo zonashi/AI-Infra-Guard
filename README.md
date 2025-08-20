@@ -13,9 +13,9 @@
   
 </div>
 
-**A.I.G (AI-Infra-Guard)** 旨在为AI安全提供一站式的安全解决方案。A.I.G集成常见AI安全，通过全面、智能、易用的AI安全检测工具，帮助开发者和企业发现并修复 AI 系统中的安全漏洞，确保 AI 应用的安全、可靠、可控。
+**A.I.G (AI-Infra-Guard)** 集成常见AI安全场景和检测方法，旨在为AI安全提供一站式的安全解决方案。
 
-[English](./README_EN.md) | **简体中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
+[English](./README_EN.md) ｜ **简体中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
 
 ## 目录
 - [✨ 核心功能](#-核心功能)
@@ -62,6 +62,14 @@
 <div align="center">
   <img src="img/model-security.png" alt="大模型安全体检" width="600">
   <p><i>全面评估大模型安全性</i></p>
+</div>
+
+### 插件管理
+<div>
+<div style="display: flex;">
+  <img src="img/plugin-1.png" alt="大模型安全体检" style="width: 50%; margin-right: 5px;">
+  <img src="img/plugin-2.png" alt="AI基础设施扫描" style="width: 50%; margin-left: 5px;">
+</div>
 </div>
 
 ## 🚀 快速开始
@@ -117,7 +125,13 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 ### 🙏 致谢
 
 感谢以下参与A.I.G共建团队或项目:
-- xx
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 2%;">
+  <img src="img/keen_lab_logo.svg" alt="Keen Lab" style="width: 30%; height: auto;">
+  <img src="img/wechat_security.png" alt="WeChat Security" style="width: 30%; height: auto;">
+  <img src="img/fit_sec_logo.png" alt="Fit Security" style="width: 30%; height: auto;">
+</div>
+</br>
 
 感谢所有为 A.I.G 项目做出贡献的开发者们：
 
