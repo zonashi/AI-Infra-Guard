@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Tencent/AI-Infra-Guard/pkg/vulstruct"
 	iputil "github.com/projectdiscovery/utils/ip"
@@ -489,8 +490,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 				fileName := filepath.Join(tempDir, fmt.Sprintf("tmp-%d%s", time.Now().UnixMicro(), ext))
 				err := DownloadFile(m.Server, request.SessionId, file, fileName)
 				if err != nil {
-					gologger.Errorf("下载文件失败: %v", err)
-					return err
+					return fmt.Errorf("下载文件失败: %v", err)
 				}
 				gologger.Infof("文件下载成功: %s", file)
 				extractPath, _ := filepath.Abs(filepath.Join(tempDir, fmt.Sprintf("tmp-%d", time.Now().UnixMicro())))
@@ -499,10 +499,11 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 					err = utils.ExtractZipFile(fileName, extractPath)
 				case ".tgz", ".tar.gz":
 					err = utils.ExtractTGZ(fileName, extractPath)
+				default:
+					return errors.New("不支持的文件类型")
 				}
 				if err != nil {
-					gologger.Errorf("解压文件失败: %v", err)
-					return err
+					return errors.New(fmt.Sprintf("解压文件失败: %v", err))
 				}
 				folder = extractPath
 			}
@@ -511,8 +512,7 @@ func (m *McpScanAgent) Execute(ctx context.Context, request TaskRequest, callbac
 			extractPath, _ := filepath.Abs(filepath.Join(tempDir, fmt.Sprintf("tmp-%d", time.Now().UnixMicro())))
 			err := utils.GitClone(params.Content, extractPath, 30*time.Second)
 			if err != nil {
-				gologger.Errorf("克隆代码仓库失败: %v", err)
-				return err
+				return fmt.Errorf("克隆代码仓库失败: %v", err)
 			}
 			folder = extractPath
 		}
