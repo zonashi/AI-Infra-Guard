@@ -10,7 +10,7 @@
   [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
   [![Release](https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green)](https://github.com/Tencent/AI-Infra-Guard/releases)
 
-  <h3>🚀 腾讯朱雀实验室出品的一站式 AI 红队安全测试平台</h3>
+  <h3>🚀 腾讯朱雀实验室推出的一站式 AI 红队安全测试平台</h3>
 
   
 </div>
