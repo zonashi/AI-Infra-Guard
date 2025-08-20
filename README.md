@@ -7,14 +7,23 @@
   [![Release](https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green)](https://github.com/Tencent/AI-Infra-Guard/releases)
 
   <h3>🚀 腾讯朱雀实验室出品的一站式 AI 安全红队测试平台</h3>
-  <h4>全面、智能、易用的 AI 红队安全测试平台</h4>
 
-  [English](./README_EN.md) | **简体中文**
 
   <strong>⭐ 如果觉得有用，请给我们一个 Star 支持开源！</strong>
+  
 </div>
 
-**A.I.G 提供一站式解决方案，让 AI 安全检测变得简单高效！**
+**A.I.G (AI-Infra-Guard)** 旨在为 AI 基础设施和模型提供一站式的安全解决方案。随着 AI 技术的广泛应用，其安全风险也日益凸显。A.I.G 通过全面、智能、易用的安全检测工具，帮助开发者和企业发现并修复 AI 系统中的安全漏洞，确保 AI 应用的安全、可靠、可控。
+
+[English](./README_EN.md) | **简体中文**
+
+## 目录
+- [✨ 核心功能](#-核心功能)
+- [🖼️ 功能展示](#-功能展示)
+- [🚀 快速开始](#-快速开始)
+- [🙏 贡献指南](#-贡献指南)
+- [💬 加入社区](#-加入社区)
+- [📄 开源协议](#-开源协议)
 
 ## ✨ 核心功能
 
@@ -57,55 +66,47 @@
 
 ## 🚀 快速开始
 ### Docker 一键部署
+
 **系统要求**
 
 - Docker 20.10 或更高版本
 - 至少 2GB 可用内存
 - 至少 1GB 可用磁盘空间
 
-**从源码启动**
-
+首先，克隆本项目：
 ```bash
-# 克隆项目
 git clone https://github.com/Tencent/AI-Infra-Guard.git
 cd AI-Infra-Guard
+```
 
-# 启动服务
+然后，您可以选择以下任一方式启动服务：
+
+**1. 从源码构建并运行**
+```bash
+# 此方法会使用本地代码构建 Docker 镜像并启动服务
 docker-compose up -d
-
-# 访问 Web 界面
-# 打开浏览器访问: http://localhost:8088
 ```
 
-从dockerhub启动
-
+**2. 使用预构建镜像运行 (推荐)**
 ```bash
-# 克隆项目
-git clone https://github.com/Tencent/AI-Infra-Guard.git
-cd AI-Infra-Guard
-
-# 启动服务
+# 此方法会从 Docker Hub 拉取预构建的镜像，启动速度更快
 docker-compose -f docker-compose.images.yml up -d
-
-# 访问 Web 界面
-# 打开浏览器访问: http://localhost:8088
 ```
 
-## 📄 开源协议
-
-本项目基于 [MIT License](./LICENSE) 开源。
+服务启动后，即可访问 Web 界面：
+`http://localhost:8088`
 
 ## 🙏 贡献指南
 
+A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。我们欢迎社区贡献高质量的插件和功能。
+
 ### 贡献插件规则
-A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。您可以通过以下方式贡献：
+1.  **指纹规则**: 在 `data/fingerprints/` 目录下添加新的 YAML 指纹文件
+2.  **漏洞规则**: 在 `data/vuln/` 目录下添加新的漏洞检测规则
+3.  **MCP 插件**: 在 `data/mcp/` 目录下添加新的 MCP 安全检测规则
+4.  **模型评测集**: 在 `data/eval` 目录下添加新的模型评测集
 
-1. **指纹规则**: 在 `data/fingerprints/` 目录下添加新的 YAML 指纹文件
-2. **漏洞规则**: 在 `data/vuln/` 目录下添加新的漏洞检测规则
-3. **MCP 插件**: 在 `data/mcp/` 目录下添加新的 MCP 安全检测规则
-4. **模型评测集**: 在 `data/eval` 目录下添加新的模型评测集
-
-参考现有规则格式，创建新文件并通过 Pull Request 提交。
+请参考现有规则格式，创建新文件并通过 Pull Request 提交。
 
 ### 其他贡献方式
 - 🐛 [报告 Bug](https://github.com/Tencent/AI-Infra-Guard/issues)
@@ -121,19 +122,21 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
 </a>
 
----
-
-<div align="center">
-
-  [![Star History Chart](https://api.star-history.com/svg?repos=Tencent/AI-Infra-Guard&type=Date)](https://star-history.com/#Tencent/AI-Infra-Guard&Date)
-
-</div>
-
-
 ## 💬 加入社区
 
 <div align="center">
   <img src="img/wechatgroup.png" alt="微信群" width="200">
   <p><b>扫码加入 A.I.G 技术交流群</b></p>
   <p>与开发者一起讨论 AI 安全最佳实践</p>
+</div>
+
+## 📄 开源协议
+
+本项目基于 [MIT License](./LICENSE) 开源。
+
+
+<div align="center">
+
+  [![Star History Chart](https://api.star-history.com/svg?repos=Tencent/AI-Infra-Guard&type=Date)](https://star-history.com/#Tencent/AI-Infra-Guard&Date)
+
 </div>
