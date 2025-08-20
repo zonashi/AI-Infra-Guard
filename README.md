@@ -6,14 +6,14 @@
   [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
   [![Release](https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green)](https://github.com/Tencent/AI-Infra-Guard/releases)
 
-  <h3>🚀 腾讯朱雀实验室出品的一站式 AI 安全红队测试平台</h3>
+  <h3>🚀 腾讯朱雀实验室出品的一站式 AI 红队安全测试平台</h3>
 
-
-  <strong>⭐ 如果觉得有用，请给我们一个 Star 支持开源！</strong>
   
 </div>
 
-**A.I.G (AI-Infra-Guard)** 集成常见AI安全场景和检测方法，旨在为AI安全提供一站式的安全解决方案。
+**A.I.G (AI-Infra-Guard)** 集成AI基础设施漏洞扫描、MCP Server风险检测与大模型安全体检等能力，旨在为AI厂商与安全研究员提供最全面、智能与易用的AI安全风险自查解决方案。
+
+  <strong>⭐ 如果觉得有用，请给我们一个 Star 支持开源！</strong>
 
 [English](./README_EN.md) ｜ **简体中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
 
@@ -124,7 +124,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 
 ### 🙏 致谢
 
-感谢以下参与A.I.G共建团队或项目:
+感谢以下安全团队的专业共建:
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 2%;">
   <img src="img/keen_lab_logo.svg" alt="Keen Lab" style="width: 30%; height: auto;">
