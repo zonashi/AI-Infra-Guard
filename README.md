@@ -106,6 +106,15 @@ docker-compose up -d
 服务启动后，即可访问A.I.G的 Web 界面：
 `http://localhost:8088`
 
+**目录说明**
+
+| 目录/文件      | 说明               | 挂载路径                      |
+|------------|------------------|---------------------------|
+| `uploads/` | 上传文件存储目录         | `/ai-infra-guard/uploads` |
+| `db/`      | 数据库文件目录          | `/ai-infra-guard/db`      |
+| `data/`    | 知识库数据目录（指纹库、漏洞库） | `/ai-infra-guard/data`    |
+| `logs/`    | 应用日志目录           | `/ai-infra-guard/logs`    |
+
 ## 📝 贡献指南
 
 A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。我们欢迎社区贡献高质量的插件和功能。
