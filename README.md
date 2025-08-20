@@ -36,11 +36,11 @@
     </td>
     <td align="center" width="33%">
       <h3>🤖 MCP Server 安全检测</h3>
-      <p>AI Agent 驱动的智能分析<br/>检测 <b>9 大类</b>安全风险<br/>支持 <b>源码/远程</b> 等多种扫描方式</p>
+      <p>AI Agent 驱动的智能分析<br/>检测 <b>9 大类</b>MCP安全风险<br/>支持MCP <b>源代码/远程URL</b> 等多种扫描方式</p>
     </td>
     <td align="center" width="33%">
       <h3>⚡ 大模型安全体检</h3>
-      <p>基于Prompt自动化评测<br/>内置多种开源&独家评测集<br/>一键生成模型安全体检报告</p>
+      <p>一键评估多个模型Prompt安全性<br/>内置多个主流&独家评测集<br/>快速获取模型安全体检报告</p>
     </td>
   </tr>
 </table>
@@ -88,24 +88,23 @@ git clone https://github.com/Tencent/AI-Infra-Guard.git
 cd AI-Infra-Guard
 ```
 
-然后，您可以选择以下任一方式启动服务：
+然后，并安装Docker相关环境，您可以选择以下任一方式部署A.I.G服务：
 
-**1. 从源码构建并运行**
+**1. 使用预构建镜像运行 (推荐)**
+```bash
+# 此方法会从 Docker Hub 拉取预构建的镜像，启动速度更快
+docker-compose -f docker-compose.images.yml up -d
+```
+**2. 从源码构建并运行**
 ```bash
 # 此方法会使用本地代码构建 Docker 镜像并启动服务
 docker-compose up -d
 ```
 
-**2. 使用预构建镜像运行 (推荐)**
-```bash
-# 此方法会从 Docker Hub 拉取预构建的镜像，启动速度更快
-docker-compose -f docker-compose.images.yml up -d
-```
-
-服务启动后，即可访问 Web 界面：
+服务启动后，即可访问A.I.G的 Web 界面：
 `http://localhost:8088`
 
-## 🙏 贡献指南
+## 📝 贡献指南
 
 A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。我们欢迎社区贡献高质量的插件和功能。
 
@@ -120,8 +119,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 ### 其他贡献方式
 - 🐛 [报告 Bug](https://github.com/Tencent/AI-Infra-Guard/issues)
 - 💡 [提出新功能](https://github.com/Tencent/AI-Infra-Guard/issues)
-- 📝 [改进文档](https://github.com/Tencent/AI-Infra-Guard/pulls)
-- ⭐ 给项目点个 Star
+- ⭐ [改进文档](https://github.com/Tencent/AI-Infra-Guard/pulls)
 
 ### 🙏 致谢
 
