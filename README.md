@@ -46,29 +46,16 @@
 ## 🖼️ 功能展示
 
 ### A.I.G 主界面
-<div>
-  <img src="img/background.png" alt="AI-Infra-Guard" width="600">
-  <p><i>AIG首页</i></p>
-</div>
-
+![AIG首页](img/background.png)
 
 ### AI 基础设施漏洞扫描
-<div>
-  <img src="img/ai-infra-scan.png" alt="AI基础设施扫描" width="600">
-  <p><i>一键扫描发现 AI 组件安全漏洞</i></p>
-</div>
+![一键扫描发现 AI 组件安全漏洞](img/ai-infra-scan.png)
 
 ### MCP Server 安全检测
-<div>
-  <img src="img/mcp-server.png" alt="MCP安全检测" width="600">
-  <p><i>智能分析 MCP Server 安全风险</i></p>
-</div>
+![智能分析 MCP Server 安全风险](img/mcp-server.png)
 
 ### 大模型安全体检
-<div>
-  <img src="img/model-security.png" alt="大模型安全体检" width="600">
-  <p><i>全面评估大模型安全性</i></p>
-</div>
+![全面评估大模型安全性](img/model-security.png)
 
 ### 插件管理
 ![插件管理界面1](img/plugin-1.png) ![插件管理界面2](img/plugin-2.png)
