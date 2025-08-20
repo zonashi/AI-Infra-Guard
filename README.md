@@ -2,6 +2,10 @@
 
 <div align="center">
 
+[English](./README_EN.md) ｜ **中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
+
+
+
   [![GitHub Stars](https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?style=for-the-badge&logo=github&color=gold)](https://github.com/Tencent/AI-Infra-Guard)
   [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
   [![Release](https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green)](https://github.com/Tencent/AI-Infra-Guard/releases)
@@ -11,11 +15,8 @@
   
 </div>
 
-**A.I.G (AI-Infra-Guard)** 集成AI基础设施漏洞扫描、MCP Server风险检测与大模型安全体检等能力，旨在为AI厂商与安全研究员提供最全面、智能与易用的AI安全风险自查解决方案。
+**A.I.G (AI-Infra-Guard)** 集成AI基础设施漏洞扫描、MCP Server风险检测与大模型安全体检等能力，旨在为用户提供最全面、智能与易用的AI安全风险自查解决方案。
 
-  <strong>⭐ 如果觉得有用，请给我们一个 Star 支持开源！</strong>
-
-[English](./README_EN.md) ｜ **简体中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
 
 ## 目录
 - [✨ 核心功能](#-核心功能)
@@ -31,7 +32,7 @@
   <tr>
     <td align="center" width="33%">
       <h3>🔍 AI 基础设施扫描</h3>
-      <p>精准识别 <b>28+</b> AI 框架组件<br/>覆盖 <b>200+</b> 已知 CVE 漏洞<br/>支持 Gradio、Ollama、Dify、ComfyUI 等</p>
+      <p>精准识别 <b>30+</b> AI 框架组件<br/>覆盖 <b>近400个</b> 已知 CVE 漏洞<br/>如 Ollama、ComfyUI、vLLM 等</p>
     </td>
     <td align="center" width="33%">
       <h3>🤖 MCP Server 安全检测</h3>
@@ -39,7 +40,7 @@
     </td>
     <td align="center" width="33%">
       <h3>⚡ 大模型安全体检</h3>
-      <p>基于prompt对话场景评测<br/>内置多种prompt评测方法<br/>一键生成专业安全报告</p>
+      <p>基于Prompt自动化评测<br/>内置多种开源&独家评测集<br/>一键生成模型安全体检报告</p>
     </td>
   </tr>
 </table>
@@ -133,7 +134,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 </div>
 </br>
 
-感谢所有为 A.I.G 项目做出贡献的开发者们：
+感谢为 A.I.G 项目贡献代码的开发者：
 
 <a href="https://github.com/Tencent/AI-Infra-Guard/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
@@ -145,14 +146,15 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 
 <div align="center">
   <img src="img/wechatgroup.png" alt="微信群" width="200">
-  <p><b>扫码加入 A.I.G 技术交流群</b></p>
-  <p>与开发者一起讨论 AI 安全最佳实践</p>
+  <p><b>微信扫码加入 A.I.G 交流群</b></p>
+  <p>共同探讨 AI 安全最佳实践</p>
 </div>
 
 ## 📄 开源协议
 
-本项目基于 [MIT License](./LICENSE) 开源。
+本项目基于 **MIT 许可证** 开源。详细信息请查阅 [License.txt](./License.txt) 文件。
 
+---
 
 <div align="center">
 
