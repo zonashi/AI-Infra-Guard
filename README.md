@@ -31,7 +31,7 @@
 <table>
   <tr>
     <td align="center" width="33%">
-      <h3>🔍 AI 基础设施扫描</h3>
+      <h3>🔍 AI 基础设施漏洞扫描</h3>
       <p>精准识别 <b>30+</b> AI 框架组件<br/>覆盖 <b>近400个</b> 已知 CVE 漏洞<br/>如 Ollama、ComfyUI、vLLM 等</p>
     </td>
     <td align="center" width="33%">
