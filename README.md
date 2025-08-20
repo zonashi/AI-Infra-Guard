@@ -47,6 +47,8 @@
 
 ## 🖼️ 功能展示
 
+### A.I.G 主界面
+
 ### AI 基础设施漏洞扫描
 <div align="center">
   <img src="img/ai-infra-scan.png" alt="AI基础设施扫描" width="600">
