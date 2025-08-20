@@ -58,7 +58,12 @@
 ![全面评估大模型安全性](img/model-security.png)
 
 ### 插件管理
-![插件管理界面1](img/plugin-1.png) ![插件管理界面2](img/plugin-2.png)
+<table>
+  <tr>
+    <td valign="top"><img align=top src="img/plugin-1.png"/></td>
+    <td valign="top"><img align=top src="img/plugin-2.png"/></td>
+  </tr>
+</table>
 
 
 ## 🚀 快速开始
