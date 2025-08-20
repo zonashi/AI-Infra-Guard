@@ -48,6 +48,11 @@
 ## 🖼️ 功能展示
 
 ### A.I.G 主界面
+<div align="center">
+  <img src="img/background.png" alt="AI-Infra-Guard" width="600">
+  <p><i>AIG首页</i></p>
+</div>
+
 
 ### AI 基础设施漏洞扫描
 <div align="center">
@@ -162,8 +167,6 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 ## 📄 开源协议
 
 本项目基于 **MIT 许可证** 开源。详细信息请查阅 [License.txt](./License.txt) 文件。
-
----
 
 <div align="center">
 
