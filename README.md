@@ -13,9 +13,9 @@
   
 </div>
 
-**A.I.G (AI-Infra-Guard)** 旨在为 AI 基础设施和模型提供一站式的安全解决方案。随着 AI 技术的广泛应用，其安全风险也日益凸显。A.I.G 通过全面、智能、易用的安全检测工具，帮助开发者和企业发现并修复 AI 系统中的安全漏洞，确保 AI 应用的安全、可靠、可控。
+**A.I.G (AI-Infra-Guard)** 旨在为AI安全提供一站式的安全解决方案。A.I.G集成常见AI安全，通过全面、智能、易用的AI安全检测工具，帮助开发者和企业发现并修复 AI 系统中的安全漏洞，确保 AI 应用的安全、可靠、可控。
 
-[English](./README_EN.md) | **简体中文**
+[English](./README_EN.md) | **简体中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
 
 ## 目录
 - [✨ 核心功能](#-核心功能)
@@ -35,11 +35,11 @@
     </td>
     <td align="center" width="33%">
       <h3>🤖 MCP Server 安全检测</h3>
-      <p>AI Agent 驱动的智能分析<br/>检测 <b>9 大类</b>安全风险<br/>支持源码/GitHub/SSE/Stream 多种方式</p>
+      <p>AI Agent 驱动的智能分析<br/>检测 <b>9 大类</b>安全风险<br/>支持 <b>源码/远程</b> 等多种扫描方式</p>
     </td>
     <td align="center" width="33%">
       <h3>⚡ 大模型安全体检</h3>
-      <p>基于真实攻防场景评估<br/>内置多种越狱攻击方法<br/>一键生成专业安全报告</p>
+      <p>基于prompt对话场景评测<br/>内置多种prompt评测方法<br/>一键生成专业安全报告</p>
     </td>
   </tr>
 </table>
@@ -70,8 +70,8 @@
 **系统要求**
 
 - Docker 20.10 或更高版本
-- 至少 2GB 可用内存
-- 至少 1GB 可用磁盘空间
+- 至少 4GB 可用内存
+- 至少 10GB 可用磁盘空间
 
 首先，克隆本项目：
 ```bash
@@ -114,13 +114,18 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 - 📝 [改进文档](https://github.com/Tencent/AI-Infra-Guard/pulls)
 - ⭐ 给项目点个 Star
 
-### 👥 贡献者
+### 🙏 致谢
+
+感谢以下参与A.I.G共建团队或项目:
+- xx
 
 感谢所有为 A.I.G 项目做出贡献的开发者们：
 
 <a href="https://github.com/Tencent/AI-Infra-Guard/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
 </a>
+
+
 
 ## 💬 加入社区
 
