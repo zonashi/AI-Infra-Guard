@@ -71,10 +71,8 @@
 </div>
 
 ### 插件管理
-<div>
-<img src="img/plugin-1.png" alt="插件管理界面1" width="49%" align="left">
-<img src="img/plugin-2.png" alt="插件管理界面2" width="49%" align="right">
-</div>
+![插件管理界面1](img/plugin-1.png) ![插件管理界面2](img/plugin-2.png)
+
 
 ## 🚀 快速开始
 ### Docker 一键部署
@@ -157,7 +155,6 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 <div>
   <img src="img/wechatgroup.png" alt="微信群" width="200">
   <p><b>微信扫码加入 A.I.G 交流群</b></p>
-  <p>共同探讨 AI 安全最佳实践</p>
 </div>
 
 ## 📄 开源协议
