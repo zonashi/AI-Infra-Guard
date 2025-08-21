@@ -3,13 +3,13 @@
     <h1 align="center">🛡️ A.I.G (AI-Infra-Guard)</h1>
 </p>
 <p align="center">
-    <a href="">
-        <img alt="GitHub Stars" src="https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?logo=github&color=gold">
+    <a href="https://github.com/Tencent/AI-Infra-Guard">
+        <img alt="GitHub Stars" src="https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?color=gold">
     </a>
-    <a href="">
+    <a href="https://github.com/Tencent/AI-Infra-Guard">
         <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
     </a>
-    <a href="">
+    <a href="https://github.com/Tencent/AI-Infra-Guard">
         <img alt="Release" src="https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?color=green">
     </a>
 </p>
@@ -21,8 +21,10 @@
     <p>
 </h4>
 
-
-  <h3>🚀 腾讯朱雀实验室推出的一站式 AI 红队安全测试平台</h3>
+<p align="center">
+    <h3 align="center">🚀 腾讯朱雀实验室推出的一站式 AI 红队安全测试平台</h3>
+</p>
+  
 
   
 
@@ -145,12 +147,13 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 ## 🙏 致谢
 
 感谢以下安全团队的专业共建:
-
-<div>
-<img src="img/keen_lab_logo.svg" alt="Keen Lab" width="30%">
-<img src="img/wechat_security.png" alt="WeChat Security" width="30%">
-<img src="img/fit_sec_logo.png" alt="Fit Security" width="30%">
-</div>
+<table>
+  <tr>
+    <td valign="top" width="33%"><img src="img/keen_lab_logo.svg" alt="Keen Lab"></td>
+    <td valign="top" width="33%"><img src="img/wechat_security.png" alt="WeChat Security></td>
+    <td valign="top" width="33%"><img src="img/fit_sec_logo.png" alt="Fit Security"></td>
+  </tr>
+</table>
 
 感谢为 A.I.G 项目贡献代码的开发者：
 
