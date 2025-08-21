@@ -2,6 +2,17 @@
 <p align="center">
     <h1 align="center">🛡️ A.I.G (AI-Infra-Guard)</h1>
 </p>
+<p align="center">
+    <a href="">
+        <img alt="GitHub Stars" src="https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?logo=github&color=gold">
+    </a>
+    <a href="">
+        <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
+    </a>
+    <a href="">
+        <img alt="Release" src="https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?color=green">
+    </a>
+</p>
 <h4 align="center">
     <p>
         <a href="https://tencent.github.io/AI-Infra-Guard/">帮助文档</a> |
@@ -9,17 +20,7 @@
         <a href="./README_EN.md">英文</a>
     <p>
 </h4>
-<p align="center">
-    <a href="">
-        <img alt="GitHub Stars" src="https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?style=for-the-badge&logo=github&color=gold">
-    </a>
-    <a href="">
-        <img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge">
-    </a>
-    <a href="">
-        <img alt="Release" src="https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green">
-    </a>
-</p>
+
 
   <h3>🚀 腾讯朱雀实验室推出的一站式 AI 红队安全测试平台</h3>
 
@@ -35,6 +36,7 @@
 - [🙏 贡献指南](#-贡献指南)
 - [💬 加入社区](#-加入社区)
 - [📄 开源协议](#-开源协议)
+
 
 ## ✨ 核心功能
 
