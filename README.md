@@ -149,8 +149,8 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 感谢以下安全团队的专业共建:
 <table>
   <tr>
-    <td width="33%"><img src="img/wechat_security.png" alt="WeChat Security"></td>
     <td width="33%"><img src="img/keen_lab_logo.svg" alt="Keen Lab"></td>
+    <td width="33%"><img src="img/wechat_security.png" alt="WeChat Security"></td>
     <td width="33%"><img src="img/fit_sec_logo.png" alt="Fit Security"></td>
   </tr>
 </table>
