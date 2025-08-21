@@ -1,64 +1,64 @@
-# 2. 快速开始
+# Getting Started
 
-本章节将指导您如何快速部署和使用A.I.G。
+This chapter will guide you on how to quickly deploy and use A.I.G.
 
-## 一键安装
+## One-Click Installation
 
-### 基于Docker部署
+### Deploying with Docker
 ```bash
 docker-compose -f docker-compose.images.yml up -d
 ```
 
-安装完成后，您可以通过浏览器访问 `http://localhost:8088` 来使用A.I.G的Web界面。
+After the installation is complete, you can access the A.I.G Web UI by visiting `http://localhost:8088` in your browser.
 
-## 配置模型KEY
+## Configure Model KEY
 
-A.I.G 的`MCP扫描`、`大模型安全体检`功能需要使用到大模型API。若需要使用这两个功能，可以先配置大模型API KEY。
+A.I.G's `MCP Scan` and `Large Model Security Health Check` features require the use of a large model API. If you need to use these two functions, you can first configure the large model API KEY.
 
 ![image-20250814173229996](./assets/image-20250814173229996.png)
 
-配置大模型必须的 模型名称、API Key、Base URL，后点击保存即可。
+Configure the required Model Name, API Key, and Base URL, then click Save.
 
 ![image-20250813113550192](./assets/image-20250813113550192.png)
 
 
-## 常见问题
+## Frequently Asked Questions
 
-1. **端口冲突**
+1. **Port Conflict**
    ```bash
-   # 修改webserver端口映射
+   # Modify the webserver port mapping
    ports:
-     - "8080:8088"  # 使用8080端口
+     - "8080:8088"  # Use port 8080
    ```
 
-2. **权限问题**
+2. **Permission Issues**
    ```bash
-   # 检查数据目录权限
+   # Check data directory permissions
    sudo chown -R $USER:$USER ./data
    ```
 
-3. **服务启动失败**
+3. **Service Startup Failure**
    ```bash
-   # 查看详细日志
+   # View detailed logs
    docker-compose logs webserver
    docker-compose logs agent
    ```
 
-4. **停止服务**
+4. **Stopping the Service**
     ```bash
-    # 停止服务
+    # Stop the service
     docker-compose down
     
-    # 停止服务并删除数据卷（谨慎使用）
+    # Stop the service and remove data volumes (use with caution)
     docker-compose down -v
     ```
 
 
-## 更新升级
+## Updates and Upgrades
 
 ```bash
-# 重新构建并启动
+# Rebuild and start
 docker-compose -f docker-compose.images.yml up -d --build
-# 清理旧镜像
+# Clean up old images
 docker image prune -f
 ```

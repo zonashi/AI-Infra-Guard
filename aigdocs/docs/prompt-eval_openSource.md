@@ -1,65 +1,64 @@
-# 5. Prompt安全评测
+# Prompt Security Evaluation
 
-## 简介
+## Introduction
 
-Prompt安全评测提供简单易用、高效全面的大模型安全能力检测，通过"大模型安全体检"一键发现安全问题，帮助开发者高效识别并修复安全风险。
+Prompt Security Evaluation provides a simple, efficient, and comprehensive way to test the security capabilities of large models. The "Large Model Security Health Check" allows you to discover security issues with one click, helping developers efficiently identify and mitigate security risks.
 
-## 快速开始
+## Quick Start
 
-### 三步完成
-![大模型安全体检主界面](./assets/image-prompt-eval-openSource.png)
-1. **选择任务类型**：点击对话框下方的"大模型安全体检"
-2. **配置模型和参数**：选择/配置要检测的模型
-   - **安全体检**：选择内置数据集或上传自定义数据集（详见自定义数据集管理）
-3. **启动任务并查看报告**：点击按钮，等待任务完成后查看详细结果报告
+### Complete in Three Steps
+![Large Model Security Health Check Main Interface](./assets/image-prompt-eval-openSource.png)
+1. **Select Task Type**: Click "Large Model Security Health Check" below the dialog box.
+2. **Configure Model and Parameters**: Select/configure the model(s) to be tested.
+   - **Security Health Check**: Choose from built-in datasets or upload a custom dataset (see Custom Dataset Management for details).
+3. **Start Task and View Report**: Click the button, wait for the task to complete, and then view the detailed results report.
 
-## 主要功能模块
+## Main Functional Modules
 
-### 1. 大模型配置
+### 1. Large Model Configuration
 
-- **支持的模型类型**：兼容 OpenAI API 格式的模型
-- **配置参数**：
-  - 模型名称，例如：`openai/gpt-4o`
-  - API 基础 URL，例如：`https://openrouter.ai/api/v1`
-  - API 密钥
+- **Supported Model Types**: Compatible with models that follow the OpenAI API format.
+- **Configuration Parameters**:
+  - Model Name, e.g., `openai/gpt-4o`
+  - API Base URL, e.g., `https://openrouter.ai/api/v1`
+  - API Key
 
-### 2. 大模型安全体检
+### 2. Large Model Security Health Check
 
-**数据集选择：**
-- 内置精选安全测试数据集，覆盖主要安全场景
-- 支持使用自定义数据集（详见自定义数据集管理）
-- 自动预估任务执行时间，便于规划测试
+**Dataset Selection:**
+- Built-in, curated security test datasets covering major security scenarios.
+- Support for using custom datasets (see Custom Dataset Management for details).
+- Automatic estimation of task execution time for better planning.
 
-![数据集选择](./assets/image-prompt-eval-select-dataset.png)
+![Dataset Selection](./assets/image-prompt-eval-select-dataset.png)
 
-**体检执行：**
-- 支持单模型或多模型并行体检
-- 自动生成详细的安全评分和风险报告
-- 提供模型间安全性能横向对比分析
+**Health Check Execution:**
+- Supports single-model or multi-model parallel health checks.
+- Automatically generates detailed security scores and risk reports.
+- Provides comparative analysis of security performance between models.
 
-**报告展示：**
-- 可视化展示体检结果，包括成功/失败率、风险分析等
-- 模型安全性评级：高、中、低
-- 支持全量数据结果导出
+**Report Display:**
+- Visualized presentation of health check results, including success/failure rates, risk analysis, etc.
+- Model security ratings: High, Medium, Low.
+- Supports exporting the full set of results data.
 
-![模型横向安全对比](./assets/image-prompt-eval-report.png)
-![模型体检详情报告](./assets/image-prompt-eval-report-case.png)
+![Model Security Comparison](./assets/image-prompt-eval-report.png)![Model Health Check Detail Report](./assets/image-prompt-eval-report-case.png)
 
-### 3. 自定义数据集管理
+### 3. Custom Dataset Management
 
-系统支持两种方式使用自定义数据集：
+The system supports two ways to use custom datasets:
 
-**临时上传：**
-- 在执行体检任务时临时上传，任务完成后不保存
-- 兼容主流格式（CSV、JSON、JSONL、Excel、Parquet、TXT）
-- 自动识别常见prompt列名（如prompt、question、query、text、content等）
+**Temporary Upload:**
+- Uploaded temporarily when executing a health check task; not saved after the task is complete.
+- Compatible with major formats (CSV, JSON, JSONL, Excel, Parquet, TXT).
+- Automatically recognizes common prompt column names (e.g., prompt, question, query, text, content).
 
-> 说明：未来版本将支持用户自定义列名配置
+> Note: Future versions will support user-defined column name configurations.
 
-**数据集管理：**
-- 通过管理页面永久保存到系统，支持重复使用和共享
-- 要求标准JSON格式，确保数据质量和一致性
+**Dataset Management:**
+- Permanently save datasets to the system through the management page for repeated use and sharing.
+- Requires standard JSON format to ensure data quality and consistency.
 
-![数据集管理界面](./assets/image-prompt-eval-datasets.png)
+![Dataset Management Interface](./assets/image-prompt-eval-datasets.png)
 
-> 说明：未来版本将提供数据集质量评估和用户贡献排行
+> Note: Future versions will provide dataset quality assessment and user contribution rankings.
