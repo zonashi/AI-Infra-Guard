@@ -34,7 +34,7 @@
     </td>
     <td width="33%">
       <h3>🤖 MCP Server 安全检测</h3>
-      <p>检测 <b>9 大类</b>MCP安全风险<br/>支持<b>源代码/远程URL</b>等多种扫描方式</p>
+      <p>基于AI Agent驱动<br />检测 <b>9 大类</b>MCP安全风险<br/>支持<b>源代码/远程URL</b>扫描</p>
     </td>
     <td width="33%">
       <h3>⚡ 大模型安全体检</h3>
@@ -81,7 +81,7 @@ git clone https://github.com/Tencent/AI-Infra-Guard.git
 cd AI-Infra-Guard
 ```
 
-然后，并安装Docker相关环境，您可以选择以下任一方式部署A.I.G服务：
+然后安装好[Docker相关环境](https://docs.docker.com/get-started/get-docker/)，您可以选择以下任一方式部署A.I.G服务：
 
 **1. 使用预构建镜像运行 (推荐)**
 ```bash
@@ -140,6 +140,8 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
 </a>
 
+---
+- Prompt安全集成 [deepeval](https://github.com/confident-ai/deepeval)
 
 
 ## 💬 加入社区
