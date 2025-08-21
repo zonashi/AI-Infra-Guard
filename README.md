@@ -145,11 +145,10 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 感谢以下安全团队的专业共建:
 
 <div>
-<img src="img/keen_lab_logo.svg" alt="Keen Lab" width="30%" height="80">
-<img src="img/wechat_security.png" alt="WeChat Security" width="30%" height="80">
-<img src="img/fit_sec_logo.png" alt="Fit Security" width="30%" height="80">
+<img src="img/keen_lab_logo.svg" alt="Keen Lab" width="30%">
+<img src="img/wechat_security.png" alt="WeChat Security" width="30%">
+<img src="img/fit_sec_logo.png" alt="Fit Security" width="30%">
 </div>
-</br>
 
 感谢为 A.I.G 项目贡献代码的开发者：
 
@@ -157,8 +156,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
 </a>
 
-<br />
-
+<br><br>
 
 ## 💬 加入社区
 
@@ -168,7 +166,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 </div>
 合作邮箱: zhuque@tencent.com
 
-<br />
+<br><br>
 
 ## 📄 开源协议
 
