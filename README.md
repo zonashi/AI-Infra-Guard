@@ -28,15 +28,15 @@
 
 <table>
   <tr>
-    <td width="33%">
+    <td>
       <h3>🔍 AI 基础设施漏洞扫描</h3>
       <p>精准识别 <b>30+</b> AI 框架组件<br/>覆盖 <b>近400个</b> 已知 CVE 漏洞<br/>如 Ollama、ComfyUI、vLLM 等</p>
     </td>
-    <td width="33%">
+    <td>
       <h3>🤖 MCP Server 安全检测</h3>
       <p>基于AI Agent驱动<br />检测 <b>9 大类</b>MCP安全风险<br/>支持<b>源代码/远程URL</b>扫描</p>
     </td>
-    <td width="33%">
+    <td>
       <h3>⚡ 大模型安全体检</h3>
       <p>快速接入评估模型Prompt安全性<br/>内置多个主流&独家评测集<br/>快速获取大模型安全体检报告</p>
     </td>
