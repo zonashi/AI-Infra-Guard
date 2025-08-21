@@ -1,4 +1,4 @@
-
+                       
 <p align="center">
     <h1 align="center">🛡️ A.I.G (AI-Infra-Guard)</h1>
 </p>
@@ -149,11 +149,13 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 感谢以下安全团队的专业共建:
 <table>
   <tr>
-    <td valign="top" width="33%"><img src="img/keen_lab_logo.svg" alt="Keen Lab"></td>
-    <td valign="top" width="33%"><img src="img/wechat_security.png" alt="WeChat Security></td>
-    <td valign="top" width="33%"><img src="img/fit_sec_logo.png" alt="Fit Security"></td>
+    <td width="33%"><img src="img/wechat_security.png" alt="WeChat Security"></td>
+    <td width="33%"><img src="img/keen_lab_logo.svg" alt="Keen Lab"></td>
+    <td width="33%"><img src="img/fit_sec_logo.png" alt="Fit Security"></td>
   </tr>
 </table>
+
+<br>
 
 感谢为 A.I.G 项目贡献代码的开发者：
 
@@ -161,7 +163,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
 </a>
 
-<br><br>
+<br>
 
 ## 💬 加入社区
 
@@ -169,7 +171,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="img/wechatgroup.png" alt="微信群" width="200">
   <p><b>微信扫码加入 A.I.G 交流群</b></p>
 </div>
-合作邮箱: zhuque@tencent.com
+如您有合作需求或问题反馈，可以通过以下邮箱联系我们: zhuque(at)tencent.com
 
 <br><br>
 
