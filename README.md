@@ -1,17 +1,29 @@
-# 🛡️ A.I.G (AI-Infra-Guard)
 
-<div>
-
-[English](./README_EN.md) ｜ **中文** ｜ [帮助文档](https://tencent.github.io/AI-Infra-Guard/)
-
-  [![GitHub Stars](https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?style=for-the-badge&logo=github&color=gold)](https://github.com/Tencent/AI-Infra-Guard)
-  [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-  [![Release](https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green)](https://github.com/Tencent/AI-Infra-Guard/releases)
+<p align="center">
+    <h1 align="center">🛡️ A.I.G (AI-Infra-Guard)</h1>
+</p>
+<h4 align="center">
+    <p>
+        <a href="https://tencent.github.io/AI-Infra-Guard/">帮助文档</a> |
+        <a href="#">中文</a> |
+        <a href="./README_EN.md">英文</a>
+    <p>
+</h4>
+<p align="center">
+    <a href="">
+        <img alt="GitHub Stars" src="https://img.shields.io/github/stars/Tencent/AI-Infra-Guard?style=for-the-badge&logo=github&color=gold">
+    </a>
+    <a href="">
+        <img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge">
+    </a>
+    <a href="">
+        <img alt="Release" src="https://img.shields.io/github/v/release/Tencent/AI-Infra-Guard?style=for-the-badge&color=green">
+    </a>
+</p>
 
   <h3>🚀 腾讯朱雀实验室推出的一站式 AI 红队安全测试平台</h3>
 
   
-</div>
 
 **A.I.G (AI-Infra-Guard)** 集成AI基础设施漏洞扫描、MCP Server风险检测与大模型安全体检等能力，旨在为用户提供最全面、智能与易用的AI安全风险自查解决方案。
 
@@ -42,6 +54,7 @@
     </td>
   </tr>
 </table>
+<br />
 
 ## 🖼️ 功能展示
 
@@ -65,6 +78,7 @@
   </tr>
 </table>
 
+<br />
 
 ## 🚀 快速开始
 ### Docker 一键部署
@@ -106,6 +120,8 @@ docker-compose up -d
 | `data/`    | 知识库数据目录（指纹库、漏洞库） | `/ai-infra-guard/data`    |
 | `logs/`    | 应用日志目录           | `/ai-infra-guard/logs`    |
 
+<br />
+
 ## 📝 贡献指南
 
 A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。我们欢迎社区贡献高质量的插件和功能。
@@ -122,8 +138,9 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
 - 🐛 [报告 Bug](https://github.com/Tencent/AI-Infra-Guard/issues)
 - 💡 [提出新功能](https://github.com/Tencent/AI-Infra-Guard/issues)
 - ⭐ [改进文档](https://github.com/Tencent/AI-Infra-Guard/pulls)
+<br />
 
-### 🙏 致谢
+## 🙏 致谢
 
 感谢以下安全团队的专业共建:
 
@@ -140,8 +157,7 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="https://contrib.rocks/image?repo=Tencent/AI-Infra-Guard" />
 </a>
 
----
-- Prompt安全集成 [deepeval](https://github.com/confident-ai/deepeval)
+<br />
 
 
 ## 💬 加入社区
@@ -150,6 +166,9 @@ A.I.G 的核心能力之一就是其丰富且可快速配置的插件系统。�
   <img src="img/wechatgroup.png" alt="微信群" width="200">
   <p><b>微信扫码加入 A.I.G 交流群</b></p>
 </div>
+合作邮箱: zhuque@tencent.com
+
+<br />
 
 ## 📄 开源协议
 
