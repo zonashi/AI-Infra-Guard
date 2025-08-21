@@ -20,7 +20,7 @@ from deepteam.metrics import BaseRedTeamingMetric
 from deepteam.metrics.hallucination.template import (
     HallucinationTemplate,
 )
-from deepeval.metrics.red_teaming_metrics.hallucination.schema import *
+from deepteam.metrics.hallucination.schema import *
 
 
 class HallucinationMetric(BaseRedTeamingMetric):
