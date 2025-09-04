@@ -116,6 +116,7 @@ docker-compose up -d
 Once the service is running, you can access the A.I.G web interface at:
 `http://localhost:8088`
 
+
 **Directory Structure**
 
 | Directory/File      | Description                                                 | Mount Path                      |
